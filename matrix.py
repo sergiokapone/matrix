@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 
 
-yaml_file = "bachelor.yaml"
+yaml_file = "magister.yaml"
 
 def generate_matrices_from_yaml(yaml_file=yaml_file, output_file="matrices.xlsx"):
     """
@@ -153,157 +153,6 @@ def interactive_fill_mappings(yaml_file=yaml_file):
     
     print(f"\n🎉 Заповнення завершено! Заповнено {len(mappings)} дисциплін")
 
-import pandas as pd
-import yaml
-from pathlib import Path
-import webbrowser
-from datetime import datetime
-
-def generate_matrices_from_yaml(yaml_file="curriculum.yaml", output_file="matrices.xlsx"):
-    """
-    Генерує Excel файл з матрицями компетенцій та програмних результатів на основі YAML конфігу
-    """
-    
-    # Завантажуємо YAML
-    with open(yaml_file, 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-    
-    disciplines = config["disciplines"]
-    competencies = config["competencies"] 
-    program_results = config["program_results"]
-    mappings = config["mappings"]
-    
-    # === МАТРИЦЯ КОМПЕТЕНЦІЙ ===
-    comp_df = pd.DataFrame("", 
-                          index=list(competencies.keys()), 
-                          columns=list(disciplines.keys()))
-    
-    # === МАТРИЦЯ ПРОГРАМНИХ РЕЗУЛЬТАТІВ ===
-    prog_df = pd.DataFrame("", 
-                          index=list(program_results.keys()),
-                          columns=list(disciplines.keys()))
-    
-    # Заповнюємо матриці на основі mappings
-    for discipline_code, mapping in mappings.items():
-        if discipline_code in disciplines:
-            # Компетенції
-            for comp_code in mapping.get("competencies", []):
-                if comp_code in comp_df.index:
-                    comp_df.at[comp_code, discipline_code] = "+"
-            
-            # Програмні результати
-            for prog_code in mapping.get("program_results", []):
-                if prog_code in prog_df.index:
-                    prog_df.at[prog_code, discipline_code] = "+"
-    
-    # Створюємо багаторівневі заголовки колонок
-    comp_columns = pd.MultiIndex.from_tuples(
-        [(disciplines[code], code) for code in comp_df.columns],
-        names=["Дисципліна", "Код"]
-    )
-    
-    prog_columns = pd.MultiIndex.from_tuples(
-        [(disciplines[code], code) for code in prog_df.columns], 
-        names=["Дисципліна", "Код"]
-    )
-    
-    comp_df.columns = comp_columns
-    prog_df.columns = prog_columns
-    
-    # Зберігаємо в один Excel файл з двома листами
-    with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-        comp_df.to_excel(writer, sheet_name='Компетентності')
-        prog_df.to_excel(writer, sheet_name='Програмні результати')
-    
-    print(f"✅ Матриці згенеровано: {output_file}")
-    print(f"📊 Компетенції: {len(competencies)} x {len(disciplines)}")
-    print(f"📊 Програмні результати: {len(program_results)} x {len(disciplines)}")
-
-def interactive_fill_mappings(yaml_file="curriculum.yaml"):
-    """
-    Інтерактивне заповнення відповідностей між дисциплінами і компетенціями/результатами
-    """
-    # Завантажуємо конфігурацію
-    with open(yaml_file, 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-    
-    disciplines = config["disciplines"]
-    competencies = config["competencies"]
-    program_results = config["program_results"]
-    mappings = config.get("mappings", {})
-    
-    # Знаходимо незаповнені дисципліни
-    unfilled = [code for code in disciplines.keys() if code not in mappings]
-    
-    if not unfilled:
-        print("🎉 Всі дисципліни вже заповнені!")
-        return
-    
-    print(f"📝 Знайдено {len(unfilled)} незаповнених дисциплін")
-    print("=" * 60)
-    
-    for i, disc_code in enumerate(unfilled):
-        print(f"\n[{i+1}/{len(unfilled)}] {disc_code}: {disciplines[disc_code]}")
-        print("-" * 50)
-        
-        # Показуємо компетенції
-        print("\n🎯 КОМПЕТЕНЦІЇ:")
-        comp_list = list(competencies.keys())
-        for j, comp_code in enumerate(comp_list):
-            print(f"{j+1:2d}. {comp_code}: {competencies[comp_code][:60]}...")
-        
-        # Вибір компетенцій
-        print("\nВиберіть компетенції (номери через кому, або Enter для пропуску):")
-        comp_input = input("Компетенції: ").strip()
-        selected_comps = []
-        
-        if comp_input:
-            try:
-                indices = [int(x.strip())-1 for x in comp_input.split(',')]
-                selected_comps = [comp_list[i] for i in indices if 0 <= i < len(comp_list)]
-                print(f"✅ Обрано: {', '.join(selected_comps)}")
-            except:
-                print("❌ Некоректний ввід, пропускаю компетенції")
-        
-        # Показуємо програмні результати
-        print("\n🎯 ПРОГРАМНІ РЕЗУЛЬТАТИ:")
-        prog_list = list(program_results.keys())
-        for j, prog_code in enumerate(prog_list):
-            print(f"{j+1:2d}. {prog_code}: {program_results[prog_code][:60]}...")
-        
-        # Вибір результатів
-        print("\nВиберіть програмні результати (номери через кому, або Enter для пропуску):")
-        prog_input = input("Результати: ").strip()
-        selected_progs = []
-        
-        if prog_input:
-            try:
-                indices = [int(x.strip())-1 for x in prog_input.split(',')]
-                selected_progs = [prog_list[i] for i in indices if 0 <= i < len(prog_list)]
-                print(f"✅ Обрано: {', '.join(selected_progs)}")
-            except:
-                print("❌ Некоректний ввід, пропускаю результати")
-        
-        # Зберігаємо вибір
-        mappings[disc_code] = {
-            "competencies": selected_comps,
-            "program_results": selected_progs
-        }
-        
-        # Автозбереження
-        config["mappings"] = mappings
-        with open(yaml_file, 'w', encoding='utf-8') as f:
-            yaml.dump(config, f, allow_unicode=True, default_flow_style=False, indent=2, sort_keys=False)
-        
-        print(f"💾 Збережено {disc_code}")
-        
-        # Питаємо чи продовжувати
-        if i < len(unfilled) - 1:
-            cont = input("\nПродовжити? (Enter - так, q - вихід): ").strip().lower()
-            if cont == 'q':
-                break
-    
-    print(f"\n🎉 Заповнення завершено! Заповнено {len(mappings)} дисциплін")
 
 def generate_html_report(yaml_file=yaml_file):
     """
@@ -428,16 +277,41 @@ def generate_html_report(yaml_file=yaml_file):
         html += f'<td style="text-align: left; font-size: 0.9em;">{prog_text}</td>'
         html += '</tr>'
     
+    html += '</table>'
+    
+    # Пам'ятка з розшифровкою компетенцій та програмних результатів
+    html += '<h2>📖 Пам\'ятка: розшифровка компетенцій та програмних результатів</h2>'
+    
+    # Компетенції
+    html += '<h3>🎯 Компетенції</h3>'
+    html += '<table style="width: 100%; font-size: 0.9em;">'
+    html += '<tr><th style="width: 10%;">Код</th><th style="width: 90%;">Опис</th></tr>'
+    
+    for comp_code, comp_desc in competencies.items():
+        html += f'<tr><td style="text-align: center;"><strong>{comp_code}</strong></td>'
+        html += f'<td style="text-align: left; padding-left: 10px;">{comp_desc}</td></tr>'
+    
+    html += '</table>'
+    
+    # Програмні результати
+    html += '<h3>📋 Програмні результати навчання</h3>'
+    html += '<table style="width: 100%; font-size: 0.9em;">'
+    html += '<tr><th style="width: 10%;">Код</th><th style="width: 90%;">Опис</th></tr>'
+    
+    for prog_code, prog_desc in program_results.items():
+        html += f'<tr><td style="text-align: center;"><strong>{prog_code}</strong></td>'
+        html += f'<td style="text-align: left; padding-left: 10px;">{prog_desc}</td></tr>'
+    
     html += '</table></body></html>'
     
     # Зберігаємо та відкриваємо
-    temp_file = Path(yaml_file).with_suffix('.html').resolve()
+    temp_file = Path(yaml_file).with_suffix('.html')
     with open(temp_file, 'w', encoding='utf-8') as f:
         f.write(html)
     
-    file_url = temp_file.as_uri()
-    webbrowser.open(f'file://{file_url}')
-    print(f"📊 HTML звіт відкрито в браузері: {file_url}")
+    webbrowser.open(f'file://{temp_file.absolute()}')
+    print(f"📊 HTML звіт відкрито в браузері: {temp_file}")
+
 
 def show_statistics(yaml_file=yaml_file):
     """
