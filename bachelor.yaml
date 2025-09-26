@@ -1,3 +1,14 @@
+metadata:
+  title: "Освітньо-професійна програма \"Прикладна фізика\""
+  university: "НТУ \"КПІ ім. Ігоря Сікорського\""
+  faculty: "НН Фізико-технічний інститут"
+  department: "Кафедра прикладної фізики"
+  specialty: "105 Прикладна фізика"
+  website: "https://osvita.kpi.ua/sites/default/files/opfiles/105_oppb_pf_2024.pdf"
+  year: "2024"
+  degree: "Бакалавр"
+  created_date: "2025-01-01"
+  last_updated: "2025-09-26"  # автоматично оновлюється
 disciplines:
   ЗО 01: Математичний аналіз
   ЗО 02: Алгебра та геометрія
