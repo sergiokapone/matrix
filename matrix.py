@@ -223,7 +223,7 @@ def generate_html_report(yaml_file="curriculum.yaml"):
     <html>
     <head>
         <meta charset="utf-8">
-        <title>{metadata.get("title", "Матриці компетенцій та результатів навчання")}</title>
+        <title>{metadata.get("title", "Матриці компетенцій")} - Звіт</title>
         <style>
             body {{ font-family: Arial, sans-serif; margin: 20px; }}
             table {{ border-collapse: collapse; margin: 20px 0; }}
@@ -233,13 +233,12 @@ def generate_html_report(yaml_file="curriculum.yaml"):
             .empty {{ background-color: #f8f9fa; }}
             .discipline-header {{ background-color: #e9ecef; writing-mode: vertical-rl; text-orientation: mixed; }}
             .stats {{ background-color: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; }}
-            .metadata {{ background-color: #e7f3ff; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #0066cc; }}
             .unfilled {{ color: #721c24; background-color: #f8d7da; padding: 10px; margin: 10px 0; }}
+            .metadata {{ background-color: #e7f3ff; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #0066cc; }}
         </style>
     </head>
     <body>
-        <h1>📊 Звіт по матрицях компетенцій</h1>
-        <p><strong>Згенеровано:</strong> {datetime.now().strftime("%d.%m.%Y о %H:%M")}</p>
+        <h1>📊 {metadata.get("title", "Звіт по матрицях компетенцій")}</h1>
     """
 
     # Блок метаданих
@@ -255,11 +254,14 @@ def generate_html_report(yaml_file="curriculum.yaml"):
             html += f"<p><strong>Кафедра:</strong> {metadata['department']}</p>"
         if metadata.get("specialty"):
             html += f"<p><strong>Спеціальність:</strong> {metadata['specialty']}</p>"
-
+        if metadata.get("specialization"):
+            html += (
+                f"<p><strong>Спеціалізація:</strong> {metadata['specialization']}</p>"
+            )
         if metadata.get("degree"):
             html += f"<p><strong>Освітній рівень:</strong> {metadata['degree']}</p>"
-        if metadata.get("year"):
-            html += f"<p><strong>Рік:</strong> {metadata['year']}</p>"
+        if metadata.get("credits_total"):
+            html += f"<p><strong>Обсяг програми:</strong> {metadata['credits_total']} кредитів ЄКТС</p>"
         if metadata.get("study_years"):
             html += f"<p><strong>Термін навчання:</strong> {metadata['study_years']} роки</p>"
         if metadata.get("website"):
@@ -271,7 +273,19 @@ def generate_html_report(yaml_file="curriculum.yaml"):
                 f"<p><strong>Останнє оновлення:</strong> {metadata['last_updated']}</p>"
             )
 
+        contacts = metadata.get("contacts", {})
+        if contacts:
+            html += "<p><strong>Контакти:</strong> "
+            contact_info = []
+            if contacts.get("email"):
+                contact_info.append(f"📧 {contacts['email']}")
+            if contacts.get("phone"):
+                contact_info.append(f"📞 {contacts['phone']}")
+            html += ", ".join(contact_info) + "</p>"
+
         html += "</div>"
+
+    html += f"<p><strong>Звіт згенеровано:</strong> {datetime.now().strftime('%d.%m.%Y о %H:%M')}</p>"
 
     # Статистика
     unfilled_disciplines = [code for code in disciplines.keys() if code not in mappings]
