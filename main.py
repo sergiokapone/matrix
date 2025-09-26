@@ -26,8 +26,8 @@ def main_menu():
     )
 
     args = parser.parse_args()
-    yaml_file = args.yaml_file
-
+    # yaml_file = args.yaml_file
+    yaml_file = Path("data") / args.yaml_file
     # Швидкі команди без меню
     if args.excel:
         if not Path(yaml_file).exists():
