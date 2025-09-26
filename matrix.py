@@ -205,25 +205,25 @@ def interactive_fill_mappings(yaml_file="curriculum.yaml"):
 
 def generate_html_report(yaml_file="curriculum.yaml"):
     """
-    Генерує HTML звіт з кольоровими таблицями
+    Генерує HTML звіт з кольоровими таблицями та інтерактивними підказками
     """
     # Завантажуємо дані
-    with open(yaml_file, "r", encoding="utf-8") as f:
+    with open(yaml_file, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
-
+    
     metadata = config.get("metadata", {})
     disciplines = config["disciplines"]
     competencies = config["competencies"]
     program_results = config["program_results"]
     mappings = config.get("mappings", {})
-
+    
     # Створюємо HTML
     html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
-        <title>{metadata.get("title", "Матриці компетенцій")} - Звіт</title>
+        <title>{metadata.get('title', 'Матриці компетенцій')} - Звіт</title>
         <style>
             body {{ font-family: Arial, sans-serif; margin: 20px; }}
             table {{ border-collapse: collapse; margin: 20px 0; }}
@@ -232,64 +232,110 @@ def generate_html_report(yaml_file="curriculum.yaml"):
             .filled {{ background-color: #d4edda; color: #155724; font-weight: bold; }}
             .empty {{ background-color: #f8f9fa; }}
             .discipline-header {{ background-color: #e9ecef; writing-mode: vertical-rl; text-orientation: mixed; }}
-            .stats {{ background-color: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; }}
-            .unfilled {{ color: #721c24; background-color: #f8d7da; padding: 10px; margin: 10px 0; }}
+            .stats {{ background-color: #d1e7dd; padding: 15px; margin: 20px 0; border-radius: 5px; }}
             .metadata {{ background-color: #e7f3ff; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #0066cc; }}
+            .unfilled {{ color: #721c24; background-color: #f8d7da; padding: 10px; margin: 10px 0; }}
+            
+            /* Стилі для підказок */
+            .tooltip-trigger {{
+                position: relative;
+                cursor: help;
+                color: #0066cc;
+                font-weight: bold;
+                text-decoration: underline;
+                text-decoration-style: dotted;
+            }}
+            
+            .tooltip-trigger:hover {{
+                color: #004499;
+            }}
+            
+            .tooltip {{
+                position: absolute;
+                background: #333;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 0.85em;
+                font-weight: normal;
+                max-width: 300px;
+                word-wrap: break-word;
+                z-index: 1000;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                opacity: 0;
+                transform: translateY(-5px);
+                transition: all 0.2s ease;
+                pointer-events: none;
+                white-space: normal;
+                line-height: 1.3;
+            }}
+            
+            .tooltip.show {{
+                opacity: 1;
+                transform: translateY(0);
+            }}
+            
+            .tooltip::after {{
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: #333 transparent transparent transparent;
+            }}
         </style>
     </head>
     <body>
-        <h1>📊 {metadata.get("title", "Звіт по матрицях компетенцій")}</h1>
+        <h1>📊 {metadata.get('title', 'Звіт по матрицях компетенцій')}</h1>
     """
-
+    
     # Блок метаданих
     if metadata:
         html += '<div class="metadata">'
-        html += "<h3>ℹ️ Інформація про програму</h3>"
-
-        if metadata.get("university"):
-            html += f"<p><strong>ВНЗ:</strong> {metadata['university']}</p>"
-        if metadata.get("faculty"):
-            html += f"<p><strong>Підрозділ:</strong> {metadata['faculty']}</p>"
-        if metadata.get("department"):
-            html += f"<p><strong>Кафедра:</strong> {metadata['department']}</p>"
-        if metadata.get("specialty"):
-            html += f"<p><strong>Спеціальність:</strong> {metadata['specialty']}</p>"
-        if metadata.get("specialization"):
-            html += (
-                f"<p><strong>Спеціалізація:</strong> {metadata['specialization']}</p>"
-            )
-        if metadata.get("degree"):
-            html += f"<p><strong>Освітній рівень:</strong> {metadata['degree']}</p>"
-        if metadata.get("credits_total"):
-            html += f"<p><strong>Обсяг програми:</strong> {metadata['credits_total']} кредитів ЄКТС</p>"
-        if metadata.get("study_years"):
-            html += f"<p><strong>Термін навчання:</strong> {metadata['study_years']} роки</p>"
-        if metadata.get("website"):
+        html += '<h3>ℹ️ Інформація про програму</h3>'
+        
+        if metadata.get('university'):
+            html += f'<p><strong>ВНЗ:</strong> {metadata["university"]}</p>'
+        if metadata.get('faculty'):
+            html += f'<p><strong>Підрозділ:</strong> {metadata["faculty"]}</p>'
+        if metadata.get('department'):
+            html += f'<p><strong>Кафедра:</strong> {metadata["department"]}</p>'
+        if metadata.get('specialty'):
+            html += f'<p><strong>Спеціальність:</strong> {metadata["specialty"]}</p>'
+        if metadata.get('specialization'):
+            html += f'<p><strong>Спеціалізація:</strong> {metadata["specialization"]}</p>'
+        if metadata.get('degree'):
+            html += f'<p><strong>Освітній рівень:</strong> {metadata["degree"]}</p>'
+        if metadata.get('credits_total'):
+            html += f'<p><strong>Обсяг програми:</strong> {metadata["credits_total"]} кредитів ЄКТС</p>'
+        if metadata.get('study_years'):
+            html += f'<p><strong>Термін навчання:</strong> {metadata["study_years"]} роки</p>'
+        if metadata.get('website'):
             html += f'<p><strong>Сайт:</strong> <a href="{metadata["website"]}" target="_blank">{metadata["website"]}</a></p>'
-        if metadata.get("version"):
-            html += f"<p><strong>Версія матриці:</strong> {metadata['version']}</p>"
-        if metadata.get("last_updated"):
-            html += (
-                f"<p><strong>Останнє оновлення:</strong> {metadata['last_updated']}</p>"
-            )
-
-        contacts = metadata.get("contacts", {})
+        if metadata.get('version'):
+            html += f'<p><strong>Версія матриці:</strong> {metadata["version"]}</p>'
+        if metadata.get('last_updated'):
+            html += f'<p><strong>Останнє оновлення:</strong> {metadata["last_updated"]}</p>'
+        
+        contacts = metadata.get('contacts', {})
         if contacts:
-            html += "<p><strong>Контакти:</strong> "
+            html += '<p><strong>Контакти:</strong> '
             contact_info = []
-            if contacts.get("email"):
-                contact_info.append(f"📧 {contacts['email']}")
-            if contacts.get("phone"):
-                contact_info.append(f"📞 {contacts['phone']}")
-            html += ", ".join(contact_info) + "</p>"
-
-        html += "</div>"
-
-    html += f"<p><strong>Звіт згенеровано:</strong> {datetime.now().strftime('%d.%m.%Y о %H:%M')}</p>"
-
+            if contacts.get('email'):
+                contact_info.append(f'📧 {contacts["email"]}')
+            if contacts.get('phone'):
+                contact_info.append(f'📞 {contacts["phone"]}')
+            html += ', '.join(contact_info) + '</p>'
+        
+        html += '</div>'
+    
+    html += f'<p><strong>Звіт згенеровано:</strong> {datetime.now().strftime("%d.%m.%Y о %H:%M")}</p>'
+    
     # Статистика
     unfilled_disciplines = [code for code in disciplines.keys() if code not in mappings]
-
+    
     html += f"""
     <div class="stats">
         <h3>📈 Статистика</h3>
@@ -298,120 +344,213 @@ def generate_html_report(yaml_file="curriculum.yaml"):
         <p><strong>Залишилось заповнити:</strong> {len(unfilled_disciplines)}</p>
     </div>
     """
-
+    
     if unfilled_disciplines:
         html += '<div class="unfilled"><h4>⚠️ Незаповнені дисципліни:</h4><ul>'
         for code in unfilled_disciplines:
-            html += f"<li>{code}: {disciplines[code]}</li>"
-        html += "</ul></div>"
-
+            html += f'<li>{code}: {disciplines[code]}</li>'
+        html += '</ul></div>'
+    
     # Матриця компетенцій
-    html += "<h2>🎯 Матриця компетенцій</h2><table>"
-
+    html += '<h2>🎯 Матриця компетенцій</h2><table>'
+    
     # Заголовок таблиці
-    html += "<tr><th>Компетенція</th>"
+    html += '<tr><th>Компетенція</th>'
     for disc_code in disciplines.keys():
         html += f'<th class="discipline-header" title="{disciplines[disc_code]}">{disc_code}</th>'
-    html += "</tr>"
-
+    html += '</tr>'
+    
     # Рядки компетенцій
     for comp_code, comp_desc in competencies.items():
         html += f'<tr><td title="{comp_desc}"><strong>{comp_code}</strong></td>'
         for disc_code in disciplines.keys():
-            has_mapping = disc_code in mappings and comp_code in mappings[
-                disc_code
-            ].get("competencies", [])
+            has_mapping = (disc_code in mappings and 
+                          comp_code in mappings[disc_code].get("competencies", []))
             cell_class = "filled" if has_mapping else "empty"
             cell_content = "+" if has_mapping else ""
             html += f'<td class="{cell_class}">{cell_content}</td>'
-        html += "</tr>"
-
-    html += "</table>"
-
+        html += '</tr>'
+    
+    html += '</table>'
+    
     # Матриця програмних результатів
-    html += "<h2>🎯 Матриця програмних результатів</h2><table>"
-
+    html += '<h2>🎯 Матриця програмних результатів</h2><table>'
+    
     # Заголовок таблиці
-    html += "<tr><th>Програмний результат</th>"
+    html += '<tr><th>Програмний результат</th>'
     for disc_code in disciplines.keys():
         html += f'<th class="discipline-header" title="{disciplines[disc_code]}">{disc_code}</th>'
-    html += "</tr>"
-
+    html += '</tr>'
+    
     # Рядки результатів
     for prog_code, prog_desc in program_results.items():
         html += f'<tr><td title="{prog_desc}"><strong>{prog_code}</strong></td>'
         for disc_code in disciplines.keys():
-            has_mapping = disc_code in mappings and prog_code in mappings[
-                disc_code
-            ].get("program_results", [])
+            has_mapping = (disc_code in mappings and 
+                          prog_code in mappings[disc_code].get("program_results", []))
             cell_class = "filled" if has_mapping else "empty"
             cell_content = "+" if has_mapping else ""
             html += f'<td class="{cell_class}">{cell_content}</td>'
-        html += "</tr>"
-
-    html += "</table>"
-
+        html += '</tr>'
+    
+    html += '</table>'
+    
     # Додаткова таблиця: Дисципліна → Компетенції, ПРН
-    html += "<h2>📋 Зведена таблиця по дисциплінах</h2>"
+    html += '<h2>📋 Зведена таблиця по дисциплінах</h2>'
     html += '<table style="width: 100%;">'
     html += '<tr><th style="width: 15%;">Код</th><th style="width: 30%;">Дисципліна</th><th style="width: 27.5%;">Компетенції</th><th style="width: 27.5%;">Програмні результати</th></tr>'
-
+    
     for disc_code, disc_name in disciplines.items():
         mapping = mappings.get(disc_code, {})
         comps = mapping.get("competencies", [])
         progs = mapping.get("program_results", [])
-
-        # Форматуємо списки
-        comp_text = ", ".join(comps) if comps else "<em>не заповнено</em>"
-        prog_text = ", ".join(progs) if progs else "<em>не заповнено</em>"
-
+        
+        # Форматуємо списки з підказками
+        if comps:
+            comp_spans = [f'<span class="tooltip-trigger" data-tooltip="{competencies.get(comp, comp)}">{comp}</span>' for comp in comps]
+            comp_text = ", ".join(comp_spans)
+        else:
+            comp_text = "<em>не заповнено</em>"
+            
+        if progs:
+            prog_spans = [f'<span class="tooltip-trigger" data-tooltip="{program_results.get(prog, prog)}">{prog}</span>' for prog in progs]
+            prog_text = ", ".join(prog_spans)
+        else:
+            prog_text = "<em>не заповнено</em>"
+        
         # Визначаємо стиль рядка
         row_class = "" if (comps or progs) else 'style="background-color: #f8d7da;"'
-
-        html += f"<tr {row_class}>"
-        html += f"<td><strong>{disc_code}</strong></td>"
+        
+        html += f'<tr {row_class}>'
+        html += f'<td><strong><span class="tooltip-trigger" data-tooltip="{disc_name}">{disc_code}</span></strong></td>'
         html += f'<td style="text-align: left; padding-left: 10px;">{disc_name}</td>'
         html += f'<td style="text-align: left; font-size: 0.9em;">{comp_text}</td>'
         html += f'<td style="text-align: left; font-size: 0.9em;">{prog_text}</td>'
-        html += "</tr>"
-
-    html += "</table>"
-
+        html += '</tr>'
+    
+    html += '</table>'
+    
     # Пам'ятка з розшифровкою компетенцій та програмних результатів
-    html += "<h2>📖 Пам'ятка: розшифровка компетенцій та програмних результатів</h2>"
-
+    html += '<h2>📖 Пам\'ятка: розшифровка компетенцій та програмних результатів</h2>'
+    
     # Компетенції
-    html += "<h3>🎯 Компетенції</h3>"
+    html += '<h3>🎯 Компетенції</h3>'
     html += '<table style="width: 100%; font-size: 0.9em;">'
     html += '<tr><th style="width: 10%;">Код</th><th style="width: 90%;">Опис</th></tr>'
-
+    
     for comp_code, comp_desc in competencies.items():
         html += f'<tr><td style="text-align: center;"><strong>{comp_code}</strong></td>'
-        html += (
-            f'<td style="text-align: left; padding-left: 10px;">{comp_desc}</td></tr>'
-        )
-
-    html += "</table>"
-
+        html += f'<td style="text-align: left; padding-left: 10px;">{comp_desc}</td></tr>'
+    
+    html += '</table>'
+    
     # Програмні результати
-    html += "<h3>📋 Програмні результати навчання</h3>"
+    html += '<h3>📋 Програмні результати навчання</h3>'
     html += '<table style="width: 100%; font-size: 0.9em;">'
     html += '<tr><th style="width: 10%;">Код</th><th style="width: 90%;">Опис</th></tr>'
-
+    
     for prog_code, prog_desc in program_results.items():
         html += f'<tr><td style="text-align: center;"><strong>{prog_code}</strong></td>'
-        html += (
-            f'<td style="text-align: left; padding-left: 10px;">{prog_desc}</td></tr>'
-        )
+        html += f'<td style="text-align: left; padding-left: 10px;">{prog_desc}</td></tr>'
+    
+    html += '</table>'
 
-    html += "</table></body></html>"
-
+    # Додаємо JavaScript для підказок
+    html += """
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const triggers = document.querySelectorAll('.tooltip-trigger');
+        let currentTooltip = null;
+        
+        triggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', function(e) {
+                // Видаляємо попередню підказку
+                if (currentTooltip) {
+                    currentTooltip.remove();
+                    currentTooltip = null;
+                }
+                
+                const tooltipText = this.getAttribute('data-tooltip');
+                if (!tooltipText) return;
+                
+                // Створюємо нову підказку
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip show';
+                tooltip.textContent = tooltipText;
+                
+                // Додаємо до body
+                document.body.appendChild(tooltip);
+                currentTooltip = tooltip;
+                
+                // Позиціонуємо підказку відносно курсора
+                const rect = this.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                
+                // Позиція зверху від елементу
+                let left = rect.left + scrollLeft + (rect.width / 2) - (tooltip.offsetWidth / 2);
+                let top = rect.top + scrollTop - tooltip.offsetHeight - 10;
+                
+                // Якщо виходить за верхню межу, показуємо знизу
+                if (top < scrollTop + 10) {
+                    top = rect.bottom + scrollTop + 10;
+                    // Змінюємо стрілочку
+                    tooltip.style.setProperty('--arrow-direction', 'up');
+                }
+                
+                // Якщо виходить за ліву межу
+                if (left < scrollLeft + 10) {
+                    left = scrollLeft + 10;
+                }
+                
+                // Якщо виходить за праву межу
+                if (left + tooltip.offsetWidth > scrollLeft + window.innerWidth - 10) {
+                    left = scrollLeft + window.innerWidth - tooltip.offsetWidth - 10;
+                }
+                
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            });
+            
+            trigger.addEventListener('mouseleave', function() {
+                if (currentTooltip) {
+                    currentTooltip.classList.remove('show');
+                    setTimeout(() => {
+                        if (currentTooltip) {
+                            currentTooltip.remove();
+                            currentTooltip = null;
+                        }
+                    }, 200);
+                }
+            });
+        });
+        
+        // Видаляємо підказку при прокрутці або кліку
+        window.addEventListener('scroll', function() {
+            if (currentTooltip) {
+                currentTooltip.remove();
+                currentTooltip = null;
+            }
+        });
+        
+        document.addEventListener('click', function() {
+            if (currentTooltip) {
+                currentTooltip.remove();
+                currentTooltip = null;
+            }
+        });
+        
+        console.log('Tooltip script loaded. Found triggers:', triggers.length);
+    });
+    </script>
+    </body></html>"""
+    
     # Зберігаємо та відкриваємо
-    temp_file = Path(yaml_file).with_suffix(".html")
-    with open(temp_file, "w", encoding="utf-8") as f:
+    temp_file = Path(yaml_file).with_suffix('.html')
+    with open(temp_file, 'w', encoding='utf-8') as f:
         f.write(html)
-
-    webbrowser.open(f"file://{temp_file.absolute()}")
+    
+    webbrowser.open(f'file://{temp_file.absolute()}')
     print(f"📊 HTML звіт відкрито в браузері: {temp_file}")
 
 
