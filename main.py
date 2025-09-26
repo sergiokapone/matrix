@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from exporters.excel_exporter import generate_matrices_from_yaml
 from exporters.html_report import generate_html_report
+from core.statistics import show_statistics
 
 
 def main_menu():
@@ -17,7 +18,11 @@ def main_menu():
         default="curriculum.yaml",
         help="Шлях до YAML файлу (за замовчуванням: curriculum.yaml)",
     )
-    parser.add_argument("--excel", "-e", help="Згенерувати тільки Excel та вийти")
+    parser.add_argument(
+        "--excel", "-x",
+        action="store_true",
+        help="Експортувати у Excel (файл створиться автоматично)"
+    )
     parser.add_argument(
         "--html", "-t", help="Згенерувати тільки HTML та вийти", action="store_true"
     )
@@ -28,13 +33,20 @@ def main_menu():
     args = parser.parse_args()
     # yaml_file = args.yaml_file
     yaml_file = Path("data") / args.yaml_file
+
+    base_dir = Path(__file__).parent.resolve()
+
     # Швидкі команди без меню
     if args.excel:
-        if not Path(yaml_file).exists():
-            print(f"❌ Файл {yaml_file} не знайдено!")
-            return
-        generate_matrices_from_yaml(yaml_file, args.excel)
+
+        # Автоматичне ім’я Excel-файлу
+        output_file = base_dir / Path(args.yaml_file).with_suffix(".xlsx")
+
+
+        generate_matrices_from_yaml(yaml_file, output_file)
+        print(f"📑 Excel файл збережено: {output_file}")
         return
+
 
     if args.html:
         if not Path(yaml_file).exists():

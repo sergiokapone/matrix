@@ -1,3 +1,6 @@
+import yaml
+
+
 def show_statistics(yaml_file="curriculum.yaml"):
     """
     Показує детальну статистику в консолі
