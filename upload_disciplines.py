@@ -14,8 +14,6 @@ def main():
     parser.add_argument('yaml_file', help='Шлях до YAML файлу з даними дисциплін')
     parser.add_argument('--disciplines-dir', default='disciplines', 
                        help='Папка з HTML файлами (за замовчуванням: disciplines)')
-    parser.add_argument('--id', default='disciplines', 
-                       help='ID Батьківської сторінки')
     
     args = parser.parse_args()
     
@@ -29,8 +27,6 @@ def main():
     load_dotenv()  # читає .env файл
     WP_AUTH = (os.getenv("WP_USER"), os.getenv("WP_PASSWORD"))
     WP_URL = "https://apd.ipt.kpi.ua/wp-json/wp/v2/pages"
-
-    PARENT_ID = args.id  # <-- сюди беремо ID з аргументів
 
     # Перевіряємо існування файлів та папок
     if not YAML_FILE.exists():
@@ -86,6 +82,12 @@ def main():
         # Генеруємо slug латиницею
         slug = slugify(title)
 
+        try:
+            PARENT_ID = yaml_data['metadata']['site_parrent_id']
+        except KeyError:
+            print("❌ У YAML немає ключа 'site_parrent_id' у metadata")
+            sys.exit(1)
+
         # Дані для WP
         data = {
             'title': title,
@@ -95,19 +97,40 @@ def main():
             'status': 'publish'
         }
 
-        # Відправка POST запиту
-        try:
-            response = requests.post(WP_URL, json=data, auth=WP_AUTH)
+        # # Відправка POST запиту
+        # try:
+        #     response = requests.post(WP_URL, json=data, auth=WP_AUTH)
 
-            if response.status_code == 201:
-                created_link = response.json().get('link')
-                print(f"✅ Створено сторінку: {title} → {created_link}")
-                # Додаємо нове посилання до словника (для відображення в кінці)
-                WP_LINKS[discipline_code] = created_link
-            else:
-                print(f"❌ Помилка для {title}: {response.status_code} → {response.text}")
-        except Exception as e:
-            print(f"❌ Помилка запиту для {title}: {e}")
+        #     if response.status_code == 201:
+        #         created_link = response.json().get('link')
+        #         print(f"✅ Створено сторінку: {title} → {created_link}")
+        #         # Додаємо нове посилання до словника (для відображення в кінці)
+        #         WP_LINKS[discipline_code] = created_link
+        #     else:
+        #         print(f"❌ Помилка для {title}: {response.status_code} → {response.text}")
+        # except Exception as e:
+        #     print(f"❌ Помилка запиту для {title}: {e}")
+
+        # 🔍 Перевірка чи є вже така сторінка
+        check_response = requests.get(WP_URL, params={"slug": slug}, auth=WP_AUTH)
+
+        if check_response.status_code == 200:
+            existing_pages = check_response.json()
+            if existing_pages:
+                page_id = existing_pages[0]['id']
+                print(f"♻️ Оновлюємо існуючу сторінку: {title} (id={page_id})")
+
+                # Оновлюємо сторінку через POST (бо PUT/DELETE заборонені сервером)
+                update_url = f"{WP_URL}/{page_id}"
+                update_response = requests.post(update_url, json=data, auth=WP_AUTH)
+
+                if update_response.status_code == 200:
+                    created_link = update_response.json().get('link')
+                    print(f"✅ Оновлено сторінку: {title} → {created_link}")
+                    WP_LINKS[discipline_code] = created_link
+                else:
+                    print(f"❌ Помилка оновлення: {update_response.status_code} → {update_response.text}")
+                continue
 
     print("-" * 60)
     print("📋 Підсумок - всі посилання:")

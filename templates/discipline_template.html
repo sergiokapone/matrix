@@ -8,18 +8,44 @@
     </div>
     {% endif %}
 
+    <!-- Карточка лектора -->
+    {% if discipline.lecturer %}
+    <div class="lecturer-card">
+        <div class="lecturer-photo">
+            <img src="{{ discipline.lecturer.photo_url }}" alt="Фото лектора {{ discipline.lecturer.full_name }}">
+        </div>
+        <div class="lecturer-info">
+            <p><strong>Лектор:</strong> 
+                {% if discipline.lecturer.profile_url %}
+                <a href="{{ discipline.lecturer.profile_url }}" target="_blank">{{ discipline.lecturer.full_name }}</a>
+                {% else %}
+                {{ discipline.lecturer.full_name }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="discipline-info">
         <div class="basic-info">
+            {% if discipline.credits %}
             <p><strong>Кредити ЄКТС:</strong> {{ discipline.credits }}</p>
+            {% endif %}
             <p><strong>Форма контролю:</strong> {{ discipline.control }}</p>
             {% if discipline.syllabus_url %}
             <p><strong>Силабус:</strong> <a href="{{ discipline.syllabus_url }}" target="_blank">Завантажити</a></p>
             {% endif %}
+            {% if discipline.online_resources %}
+                <p><strong>Розміщення курсу:</strong> <a href="{{ discipline.online_resources }}" target="_blank">Переглянути</a></p>
+            {% endif %}
         </div>
+
 
         <!-- Контекст програми -->
         <div class="program-context">
-            <p><strong>Програма:</strong> {{ metadata.title }}</p>
+            {% if metadata.website %}
+            <p><strong>Освітня програма:</strong> <a href="{{ metadata.website }}" target="_blank">Переглянути</a></p>
+            {% endif %}
             <p><strong>Рівень освіти:</strong> {{ metadata.degree }}</p>
             <p><strong>Рік програми:</strong> {{ metadata.year }}</p>
             <p><strong>Університет:</strong> {{ metadata.university }}</p>
@@ -76,9 +102,6 @@
     <!-- Додаткова інформація -->
     <div class="additional-info">
         <p><em>Останнє оновлення: {{ metadata.last_updated }}</em></p>
-        {% if metadata.website %}
-        <p><a href="{{ metadata.website }}" target="_blank">Офіційна освітня програма</a></p>
-        {% endif %}
     </div>
 </div>
 
@@ -198,5 +221,28 @@
     font-style: italic;
     color: #343a40;
 }
+
+.lecturer-card {
+    display: flex;
+    align-items: center;
+    background: #f1f8ff;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    gap: 20px;
+}
+
+.lecturer-photo img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #007cba;
+}
+
+.lecturer-info p {
+    margin: 5px 0;
+}
+
 
 </style>
