@@ -23,7 +23,7 @@ def main():
     
     # Конфігурація
     DISCIPLINES_DIR = Path(args.disciplines_dir)
-    YAML_FILE = Path(args.yaml_file)
+    YAML_FILE = Path("data") / args.yaml_file
     load_dotenv()  # читає .env файл
     WP_AUTH = (os.getenv("WP_USER"), os.getenv("WP_PASSWORD"))
     WP_URL = "https://apd.ipt.kpi.ua/wp-json/wp/v2/pages"
@@ -57,10 +57,10 @@ def main():
         # Витягуємо код дисципліни з імені файлу
         discipline_code = html_file.stem.replace('_', ' ')
         
-        # Перевіряємо, чи існує вже посилання для цієї дисципліни
-        if discipline_code in WP_LINKS:
-            print(f"⏭️  Дисципліна {discipline_code} вже існує: {WP_LINKS[discipline_code]}")
-            continue
+        # # Перевіряємо, чи існує вже посилання для цієї дисципліни
+        # if discipline_code in WP_LINKS:
+        #     print(f"⏭️  Дисципліна {discipline_code} вже існує: {WP_LINKS[discipline_code]}")
+        #     continue
         
         discipline_info = yaml_data['disciplines'].get(discipline_code)
 
@@ -96,20 +96,6 @@ def main():
             'content': content,
             'status': 'publish'
         }
-
-        # # Відправка POST запиту
-        # try:
-        #     response = requests.post(WP_URL, json=data, auth=WP_AUTH)
-
-        #     if response.status_code == 201:
-        #         created_link = response.json().get('link')
-        #         print(f"✅ Створено сторінку: {title} → {created_link}")
-        #         # Додаємо нове посилання до словника (для відображення в кінці)
-        #         WP_LINKS[discipline_code] = created_link
-        #     else:
-        #         print(f"❌ Помилка для {title}: {response.status_code} → {response.text}")
-        # except Exception as e:
-        #     print(f"❌ Помилка запиту для {title}: {e}")
 
         # 🔍 Перевірка чи є вже така сторінка
         check_response = requests.get(WP_URL, params={"slug": slug}, auth=WP_AUTH)
