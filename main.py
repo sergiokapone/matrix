@@ -4,6 +4,10 @@ from pathlib import Path
 from exporters.excel_exporter import generate_matrices_from_yaml
 from exporters.html_report import generate_html_report
 from core.statistics import show_statistics
+from core.data_validator import validate_data
+from interactive.filling import interactive_fill_mappings
+from templator.curriculum_template import create_yaml_template
+from converter.csv2yaml import csv_to_yaml_mappings, create_csv_template, validate_csv_before_conversion
 
 
 def main_menu():
@@ -29,6 +33,9 @@ def main_menu():
     parser.add_argument(
         "--stats", "-s", action="store_true", help="Показати статистику та вийти"
     )
+    parser.add_argument(
+        "--csv", "-c", help="Конвертувати CSV в YAML", metavar="CSV_FILE"
+    )
 
     args = parser.parse_args()
     # yaml_file = args.yaml_file
@@ -37,6 +44,21 @@ def main_menu():
     base_dir = Path(__file__).parent.resolve()
 
     # Швидкі команди без меню
+
+    # Швидка CSV конвертація
+    if args.csv:
+        csv_path = Path(args.csv)
+        if not csv_path.exists():
+            print(f"❌ CSV файл не знайдено: {args.csv}")
+            return
+        
+        output_file = csv_path.with_suffix('.yaml')
+        success = csv_to_yaml_mappings(args.csv, output_file=output_file)
+        
+        if success:
+            print(f"✅ CSV конвертовано в YAML: {output_file}")
+        return
+
     if args.excel:
 
         # Автоматичне ім’я Excel-файлу
@@ -78,10 +100,11 @@ def main_menu():
         print("5. 🔍 Валідація даних")
         print("6. 📄 Створити новий YAML шаблон")
         print("7. 📂 Змінити робочий файл")
+        print("8. 📋 CSV → YAML конвертер")
         print("0. ❌ Вихід")
         print("=" * 60)
 
-        choice = input("Оберіть опцію (0-7): ").strip()
+        choice = input("Оберіть опцію (0-8): ").strip()
 
         try:
             if choice == "1":
@@ -135,6 +158,43 @@ def main_menu():
                 if new_file:
                     yaml_file = new_file
                     print(f"✅ Робочий файл змінено на: {yaml_file}")
+     
+            elif choice == "8":
+                print("\n📋 CSV → YAML КОНВЕРТЕР")
+                print("1. Створити CSV шаблон")
+                print("2. Конвертувати існуючий CSV")
+                print("3. Валідувати CSV файл")
+                
+                sub_choice = input("Оберіть дію (1-3): ").strip()
+                
+                if sub_choice == "1":
+                    template_name = input("Назва CSV шаблону (Enter для 'template.csv'): ").strip()
+                    if not template_name:
+                        template_name = "template.csv"
+                    create_csv_template(template_name)
+                    
+                elif sub_choice == "2":
+                    csv_file = input("Шлях до CSV файлу: ").strip()
+                    if not csv_file:
+                        print("❌ Не вказано файл")
+                        continue
+                    
+                    if not Path(csv_file).exists():
+                        print(f"❌ Файл не знайдено: {csv_file}")
+                        continue
+                    
+                    output_file = Path(csv_file).with_suffix('.yaml')
+                    success = csv_to_yaml_mappings(csv_file=csv_file, output_file=output_file)
+                    
+                    if success:
+                        print(f"✅ Конвертація завершена: {output_file}")
+                        
+                elif sub_choice == "3":
+                    csv_file = input("Шлях до CSV файлу для валідації: ").strip()
+                    if csv_file and Path(csv_file).exists():
+                        validate_csv_before_conversion(csv_file)
+                    else:
+                        print("❌ Файл не знайдено")
 
             elif choice == "0":
                 print("👋 До побачення!")
