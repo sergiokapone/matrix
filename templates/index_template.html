@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>{{ metadata.title }} - Дисципліни</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+            .header { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+            .disciplines-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+            .discipline-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; }
+            .discipline-card h3 { margin-top: 0; color: #495057; }
+            .discipline-code { background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+            .credits { color: #6c757d; font-size: 0.9em; }
+            .metadata-info { margin-bottom: 20px; font-size: 0.95em; color: #495057; }
+            .metadata-info p { margin: 3px 0; }
+            .footer { margin-top: 40px; text-align: center; color: #6c757d; font-size: 0.9em; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>{{ metadata.title }}</h1>
+            <div class="metadata-info">
+                <p><strong>Університет:</strong> {{ metadata.university }}</p>
+                <p><strong>Інститут / Кафедра:</strong> {{ metadata.faculty }} | {{ metadata.department }}</p>
+                <p><strong>Рівень освіти:</strong> {{ metadata.degree }}</p>
+                <p><strong>Рік програми:</strong> {{ metadata.year }}</p>
+                {% if metadata.language %}<p><strong>Мова навчання:</strong> {{ metadata.language }}</p>{% endif %}
+                {% if metadata.duration %}<p><strong>Тривалість:</strong> {{ metadata.duration }}</p>{% endif %}
+                {% if metadata.website %}<p><strong>Сайт програми:</strong> <a href="{{ metadata.website }}" target="_blank">{{ metadata.website }}</a></p>{% endif %}
+            </div>
+        </div>
+
+        <h2>Освітні компоненти програми</h2>
+        <div class="disciplines-grid">
+            {% for code, discipline in disciplines.items() %}
+            <div class="discipline-card">
+                <h3><span class="discipline-code">{{ code }}</span></h3>
+                <p>{{ discipline.name }}</p>
+                <div class="credits">
+                    <strong>{{ discipline.total_credits }}</strong> кредитів ЄКТС | {{ discipline.all_controls }}
+                </div>
+
+                <a href="{{ code.replace(' ', '_').replace('/', '_') }}.html">Переглянути детально →</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 40px; text-align: center; color: #6c757d;">
+            <p>Останнє оновлення: {{ metadata.last_updated }}</p>
+        </div>
+    </body>
+    </html>

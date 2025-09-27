@@ -48,15 +48,6 @@
     {% if metadata.last_updated %}
         <p><strong>Останнє оновлення:</strong> {{ metadata.last_updated }}</p>
     {% endif %}
-
-    {% if metadata.contacts %}
-        <p><strong>Контакти:</strong>
-        {% set contact_info = [] %}
-        {% if metadata.contacts.email %}{% set _ = contact_info.append("📧 " ~ metadata.contacts.email) %}{% endif %}
-        {% if metadata.contacts.phone %}{% set _ = contact_info.append("📞 " ~ metadata.contacts.phone) %}{% endif %}
-        {{ contact_info | join(", ") }}
-        </p>
-    {% endif %}
 </div>
 {% endif %}
 
@@ -85,8 +76,8 @@
 <table>
 <tr>
     <th>Компетенція</th>
-    {% for disc_code, disc_name in disciplines.items() %}
-        <th class="discipline-header" title="{{ disc_name }}">{{ disc_code }}</th>
+    {% for disc_code, disc in disciplines.items() %}
+        <th class="discipline-header" title="{{ disc.name }}">{{ disc_code }}</th>
     {% endfor %}
 </tr>
 
@@ -105,8 +96,8 @@
 <table>
 <tr>
     <th>Програмний результат</th>
-    {% for disc_code, disc_name in disciplines.items() %}
-        <th class="discipline-header" title="{{ disc_name }}">{{ disc_code }}</th>
+    {% for disc_code, disc in disciplines.items() %}
+        <th class="discipline-header" title="{{ disc.name }}">{{ disc_code }}</th>
     {% endfor %}
 </tr>
 
@@ -129,10 +120,10 @@
     <th style="width: 27.5%;">Компетенції</th>
     <th style="width: 27.5%;">Програмні результати</th>
 </tr>
-{% for disc_code, disc_name in disciplines.items() %}
+{% for disc_code, disc in disciplines.items() %}
 <tr {% if disc_code not in mappings %} style="background-color: #f8d7da;" {% endif %}>
-    <td><strong><span class="tooltip-trigger" data-tooltip="{{ disc_name }}">{{ disc_code }}</span></strong></td>
-    <td style="text-align: left; padding-left: 10px;">{{ disc_name }}</td>
+    <td><strong><span class="tooltip-trigger" data-tooltip="{{ disc.name }}">{{ disc_code }}</span></strong></td>
+    <td style="text-align: left; padding-left: 10px;">{{ disc.name }}</td>
     <td style="text-align: left; font-size: 0.9em;">
         {% if mappings.get(disc_code) and mappings[disc_code].get("competencies") %}
             {% for comp in mappings[disc_code].get("competencies") %}
