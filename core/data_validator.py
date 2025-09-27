@@ -1,3 +1,6 @@
+import yaml
+
+
 def validate_data(yaml_file="curriculum.yaml"):
     """
     Перевіряє коректність даних у YAML файлі

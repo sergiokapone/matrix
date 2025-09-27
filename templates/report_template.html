@@ -30,6 +30,9 @@
     {% if metadata.degree %}
         <p><strong>Освітній рівень:</strong> {{ metadata.degree }}</p>
     {% endif %}
+    {% if metadata.year %}
+        <p><strong>Рік:</strong> {{ metadata.year }}</p>
+    {% endif %}
     {% if metadata.credits_total %}
         <p><strong>Обсяг програми:</strong> {{ metadata.credits_total }} кредитів ЄКТС</p>
     {% endif %}

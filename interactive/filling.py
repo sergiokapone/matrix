@@ -1,3 +1,6 @@
+import yaml
+
+
 def interactive_fill_mappings(yaml_file="curriculum.yaml"):
     """
     Інтерактивне заповнення відповідностей між дисциплінами і компетенціями/результатами
