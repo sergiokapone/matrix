@@ -1,6 +1,8 @@
 import pandas as pd
 import yaml
 
+from core.yaml_handler import load_yaml_data
+
 def generate_matrices_from_yaml(
     yaml_file="curriculum.yaml", output_file="matrices.xlsx"
 ):
@@ -9,8 +11,9 @@ def generate_matrices_from_yaml(
     """
 
     # Завантажуємо YAML
-    with open(yaml_file, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_yaml_data(yaml_file)
+    # with open(yaml_file, "r", encoding="utf-8") as f:
+    #     config = yaml.safe_load(f)
 
     metadata = config.get("metadata", {})
     disciplines = config["disciplines"]

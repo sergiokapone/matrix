@@ -1,29 +1,10 @@
 import shutil
-import yaml
 import os
 
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
-
-def setup_jinja_environment(template_dir="templates"):
-    """Налаштовує Jinja2 Environment для роботи з папкою шаблонів"""
-
-    return Environment(loader=FileSystemLoader(template_dir))
-
-
-def load_template(template_file="discipline_template.html"):
-    """Завантажує шаблон з файлу (deprecated - використовуйте setup_jinja_environment)"""
-    template_path = Path(template_file)
-
-    with open(template_path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def load_yaml_data(yaml_file):
-    """Завантажує дані з YAML файлу"""
-    with open(yaml_file, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+from core.yaml_handler import load_yaml_data
 
 
 def get_mapped_competencies(discipline_code, mappings, all_competencies):
@@ -158,7 +139,7 @@ def generate_index_page(yaml_file, output_file="index.html"):
     disciplines = data.get("disciplines", {})
 
     # Подготовка суммарных кредитов и контроля для поддисциплин
-    for code, discipline in disciplines.items():
+    for _, discipline in disciplines.items():
         if "subdisciplines" in discipline and discipline["subdisciplines"]:
             # Суммируем кредиты поддисциплин
             total_credits = sum(

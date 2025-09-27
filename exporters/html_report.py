@@ -1,12 +1,13 @@
+import webbrowser
+
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 from datetime import datetime
-import yaml
-import webbrowser
+
+from core.yaml_handler import load_yaml_data
 
 def generate_html_report(yaml_file="curriculum.yaml"):
-    with open(yaml_file, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_yaml_data(yaml_file)
 
     env = Environment(loader=FileSystemLoader("templates"))
     template = env.get_template("report_template.html")
