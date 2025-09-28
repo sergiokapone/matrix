@@ -4,11 +4,7 @@
 <li style="background: #fff !important; border: 1px solid #dee2e6 !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 12px !important; list-style: none !important; list-style-type: none !important; position: relative !important; line-height: 1.4 !important;">
 
   <div style="font-weight: 600 !important; margin-bottom: 4px !important; display: block !important;">
-    <span>
-        {{ discipline.formatted_link | safe }} {% if discipline.credits and discipline.credits != 'N/A' %}
-      ({{ discipline.credits }} кредитів{% if discipline.control and discipline.control != 'N/A' %}, {{ discipline.control }}){% endif %}
-    {% endif %}
-    </span>
+    <a href="{{ discipline.syllabus_url }}" target="_blank"><strong>{{ discipline.code }}: {{ discipline.name }}</strong></a>{% if (discipline.credits and discipline.credits != 'N/A') or (discipline.hours and discipline.hours != 'N/A') or (discipline.control and discipline.control != 'N/A') %} ({% if discipline.credits and discipline.credits != 'N/A' %}{{ discipline.credits }} кредитів{% endif %}{% if discipline.hours and discipline.hours != 'N/A' %}{% if discipline.credits and discipline.credits != 'N/A' %}, {% endif %}{{ discipline.hours }} годин{% endif %}{% if discipline.control and discipline.control != 'N/A' %}{% if (discipline.credits and discipline.credits != 'N/A') or (discipline.hours and discipline.hours != 'N/A') %}, {% endif %}{{ discipline.control }}{% endif %}){% endif %}
   </div>
 
   {% if discipline.description %}
@@ -52,7 +48,7 @@
 <div style="max-width: 900px !important; margin: 0 auto !important; padding: 20px !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important; line-height: 1.6 !important; color: #333 !important;">
 
   <h1 style="text-align: center !important; color: #2c3e50 !important; border-bottom: 2px solid #eee !important; padding-bottom: 15px !important; margin-bottom: 30px !important;">
-    {{ page_title }}
+    {{ metadata.title }} ({{ metadata.year }}). Силабуси
   </h1>
 
   <div style="background: #f8f9fa !important; padding: 20px !important; border-radius: 5px !important; margin-bottom: 30px !important; text-align: center !important; border: 1px solid #dee2e6 !important;">
@@ -65,9 +61,10 @@
   </div>
 
   {% if general_disciplines %}
-  <h2 style="color: #495057 !important; border-left: 4px solid #28a745 !important; padding-left: 15px !important; margin: 30px 0 15px 0 !important;">
+    <h2 style="color: #495057 !important; border-bottom: 4px solid #28a745 !important; padding-bottom: 10px !important; margin: 30px 0 15px 0 !important;">
     Цикл загальної підготовки
-  </h2>
+    </h2>
+
   <ul style="list-style: none !important; list-style-type: none !important; padding: 0 !important; margin: 0 !important;">
     {% for d in general_disciplines %}
       {{ discipline_card(d) }}
@@ -76,22 +73,12 @@
   {% endif %}
 
   {% if professional_disciplines %}
-  <h2 style="color: #495057 !important; border-left: 4px solid #007bff !important; padding-left: 15px !important; margin: 40px 0 15px 0 !important;">
-    Цикл професійної підготовки
-  </h2>
+    <h2 style="color: #495057 !important; border-bottom: 4px solid #28a745 !important; padding-bottom: 10px !important; margin: 30px 0 15px 0 !important;">
+        Цикл професійної підготовки
+    </h2>
+
   <ul style="list-style: none !important; list-style-type: none !important; padding: 0 !important; margin: 0 !important;">
     {% for d in professional_disciplines %}
-      {{ discipline_card(d) }}
-    {% endfor %}
-  </ul>
-  {% endif %}
-
-  {% if research_disciplines %}
-  <h2 style="color: #495057 !important; border-left: 4px solid #17a2b8 !important; padding-left: 15px !important; margin: 40px 0 15px 0 !important;">
-    Дослідницький компонент
-  </h2>
-  <ul style="list-style: none !important; list-style-type: none !important; padding: 0 !important; margin: 0 !important;">
-    {% for d in research_disciplines %}
       {{ discipline_card(d) }}
     {% endfor %}
   </ul>

@@ -14,13 +14,10 @@ from dotenv import load_dotenv
 WP_SITE_URL = "https://apd.ipt.kpi.ua"
 load_dotenv()  # Завантаження змінних оточення з .env файлу
 WP_AUTH = (os.getenv("WP_USER"), os.getenv("WP_PASSWORD"))
-PAGE_ID = 314
 WP_URL = "https://apd.ipt.kpi.ua/wp-json/wp/v2/pages"
 
 def update_wordpress_page(content, page_id=None, site_url=None):
     """Оновлення сторінки WordPress"""
-    if page_id is None:
-        page_id = PAGE_ID
     if site_url is None:
         site_url = WP_SITE_URL
         
@@ -52,8 +49,6 @@ def update_wordpress_page(content, page_id=None, site_url=None):
 
 def load_yaml_data(yaml_file=None):
     """Завантаження даних з YAML"""
-    if yaml_file is None:
-        yaml_file = YAML_FILE
     with open(yaml_file, 'r', encoding='utf-8') as f:
         return yaml.safe_load(f)
 
@@ -61,40 +56,32 @@ def prepare_disciplines(disciplines):
     """Підготовка дисциплін для шаблону"""
     general = []
     professional = []
-    research = []
     
     for code in sorted(disciplines.keys(), key=lambda x: int(re.findall(r'\d+', x)[0])):
         discipline = disciplines[code]
         
         # Форматування посилання
         name = discipline['name']
-        if 'syllabus_url' in discipline:
-            formatted_link = f'<a href="{discipline["syllabus_url"]}" target="_blank"><strong>{code}: {name}</strong></a>'
-        else:
-            formatted_link = f'<strong>{code}: {name}</strong>'
+
         
         item = {
             'code': code,
             'name': name,
             'credits': discipline.get('credits', 'N/A'),
             'control': discipline.get('control', 'N/A'),
-            'formatted_link': formatted_link,
+            'syllabus_url': discipline.get('syllabus_url'),
             'description': discipline.get('description', ''),
             'lecturer': discipline.get('lecturer'),
             'subdisciplines': discipline.get('subdisciplines', {}),
-            'online_resources': discipline.get('online_resources')
         }
         
         if code.startswith('ЗО'):
             general.append(item)
         elif code.startswith('ПО'):
             # Перевіряємо чи це дослідницький компонент
-            if any(word in name.lower() for word in ['науково-дослідна', 'дисертація', 'практика']):
-                research.append(item)
-            else:
-                professional.append(item)
+            professional.append(item)
     
-    return general, professional, research
+    return general, professional
 
 def generate_content():
     """Генерація HTML контенту"""
@@ -104,7 +91,7 @@ def generate_content():
     disciplines = data.get('disciplines', {})
     
     # Підготовуємо дисципліни
-    general, professional, research = prepare_disciplines(disciplines)
+    general, professional = prepare_disciplines(disciplines)
     
     # Налаштовуємо Jinja2
     env = Environment(loader=FileSystemLoader('templates'))
@@ -112,12 +99,10 @@ def generate_content():
     
     # Контекст для шаблону
     context = {
-        'page_title': 'Силабуси освітньо-наукової програми підготовки магістрів',
         'metadata': metadata,
         'current_date': datetime.now().strftime('%d.%m.%Y'),
         'general_disciplines': general,
-        'professional_disciplines': professional, 
-        'research_disciplines': research
+        'professional_disciplines': professional
     }
     
     return template.render(context)
@@ -145,8 +130,7 @@ def main():
     
     parser.add_argument('--page-id', 
                        type=int, 
-                       default=PAGE_ID,
-                       help=f'ID сторінки WordPress (за замовчуванням: {PAGE_ID})')
+                       help=f'ID сторінки WordPress')
     
     parser.add_argument('--yaml', 
                        default='data/program_data.yaml',
@@ -163,6 +147,8 @@ def main():
     parser.add_argument('--preview-file', 
                        default='preview.html',
                        help='Ім\'я файлу превью (за замовчуванням: preview.html)')
+    
+
     
     args = parser.parse_args()
     
@@ -201,7 +187,7 @@ def generate_content_with_template(template_path, yaml_file=None):
     disciplines = data.get('disciplines', {})
     
     # Підготовуємо дисципліни
-    general, professional, research = prepare_disciplines(disciplines)
+    general, professional = prepare_disciplines(disciplines)
     
     # Налаштовуємо Jinja2 з кастомним шляхом
     import os
@@ -218,7 +204,6 @@ def generate_content_with_template(template_path, yaml_file=None):
         'current_date': datetime.now().strftime('%d.%m.%Y'),
         'general_disciplines': general,
         'professional_disciplines': professional, 
-        'research_disciplines': research
     }
     
     return template.render(context)
