@@ -21,9 +21,11 @@ disciplines:
     name: Основи інженерії та технології сталого розвитку
     credits: 2.0
     control: Залік
+    syllabus_url: https://osvita.kpi.ua/node/1180
 
   ЗО 03:
     name: Практичний курс іноземної мови для наукової комунікації
+    syllabus_url: https://drive.google.com/file/d/1MYmR1cDyGMkIIAMdgeYg4mJrNwf_UaMK/view
     subdisciplines:
       ЗО 03.1:
         name: Частина 1
@@ -38,16 +40,19 @@ disciplines:
     name: Менеджмент стартап проектів
     credits: 3.0
     control: Залік
+    syllabus_url: https://osvita.kpi.ua/taxonomy/term/98?page=2
 
   ЗО 05:
     name: Педагогічна майстерність
     credits: 2.0
     control: Залік
+    syllabus_url: https://osvita.kpi.ua/node/1181
 
   ЗО 06:
     name: Основи наукових досліджень
     credits: 3.0
     control: Залік
+    syllabus_url: https://docs.google.com/document/d/18It_MY48OuY7p7EmuWZ4Ucusfyvnq9_B/edit
 
   ЗО 07:
     name: Комп'ютерне моделювання та симуляції в фізиці
@@ -83,6 +88,7 @@ disciplines:
     name: Технологія і застосування наноструктур
     credits: 4.0
     control: Екзамен
+    syllabus_url: https://drive.google.com/file/d/1x8uiw4mTM5XL3-GTQykt5_pNbQzpLRis/view
 
   ПО 04:
     name: Фізика суцільних середовищ
@@ -121,11 +127,13 @@ disciplines:
     name: Науково-дослідна робота за темою магістерської дисертації
     credits: 4.0
     control: Залік
+    syllabus_url: https://docs.google.com/document/d/1ZXS-XhT5xKIMzO35lWwgL7dbMsCGYneg/edit
 
   ПО 09:
     name: Науково-дослідна практика
     credits: 14.0
     control: Залік
+    syllabus_url: https://ela.kpi.ua/items/2e104af5-7820-40b4-9e22-d41e4d4fa955
 
   ПО 10:
     name: Виконання магістерської дисертації
@@ -266,11 +274,11 @@ mappings:
   ПО 01: # Квантова хімія і квантово-механічні методи обчислення
     competencies: 
     - ЗК 01
-    - ЗК 06
-    - ЗК 10
+    - ЗК 05
+    - ФК 02
     - ФК 03
-    - ФК 05
-    - ФК 08
+    - ФК 10
+    - ФК 11
     program_results: 
     - ПРН 02
     - ПРН 04
