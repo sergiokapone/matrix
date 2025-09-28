@@ -312,7 +312,7 @@ disciplines:
     name: Коливання та хвилі
     credits: 4.0
     control: Залік
-    syllabus_url: https://drive.google.com/file/d/1fTIfrWdd0VvrK_fTGHuWGGwWRMMY4d3K/view
+    syllabus_url: hhttps://drive.google.com/file/d/1T0aPVmTh91Pl1DXbXV95ukwPSuPmewbK/view
     description: |
       Курс ставить на меті розгляд з єдиних позицій коливальних та хвильових процесів в різноманітних фізичних та технічних системах. Вивчення курсу є необхідним етапом освіти фізика, що займається прикладними проблемами і закладає базу для подальшої спеціалізації.
     lecturer:
@@ -470,9 +470,9 @@ mappings:
       - ЗК 6
       - ФК 2
       - ФК 3
+      - ФК 6
     program_results:
       - ПРН 1
-      - ПРН 3
       - ПРН 4
       - ПРН 14
 
@@ -779,7 +779,6 @@ mappings:
       - ФК 6
       - ФК 7
       - ФК 10
-      - ФК 11
     program_results:
       - ПРН 1
       - ПРН 2
