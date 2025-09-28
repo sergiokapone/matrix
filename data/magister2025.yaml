@@ -463,3 +463,76 @@ mappings:
     - ПРН 14
     - ПРН 15
     - ПРН 16
+
+elevative_disciplines:
+
+  ПВ 01:
+    name: Спецглави фізичного матеріалознавства
+    syllabus_url: https://docs.google.com/document/d/18rs7sHDyr_dpUieBgWW-dUHMWVDYlDj2/edit
+
+  ПВ 02:
+    name: Основи анатомії і фізіології людини
+    syllabus_url: https://docs.google.com/document/d/15kYjeQXb8p0ZYQbqWtT0tK9mFf28vYSe/edit
+
+  ПВ 03:
+    name: Фізика горіння
+    syllabus_url: https://drive.google.com/file/d/1sAFbvZfXCWwgQUuJp7tZAVrAq-mC6u7r/view?usp=sharing
+    description: |
+      Метою курсу є ознайомлення студентів з основними поняттями і законами фізики горіння, зокрема, з кінетикою хімічних реакцій, що відбуваються в процесі горіння, з основними характеристиками полум'я, з процесами тепломасообміну в полум'ї та навколишньому середовищі, з основними типами горіння та їх особливостями. Особлива увага приділяється екологічним аспектам горіння, зокрема, утворенню шкідливих викидів і методам їхнього зменшення.
+    lecturer:
+      full_name: Пономаренко Сергій Миколайович # Повне ім'я лектора
+      profile_url: https://apd.ipt.kpi.ua/kafedra/stuff/ponomarenko/ # Посилання на профіль
+      photo_url: https://apd.ipt.kpi.ua/wp-content/uploads/2025/01/MyPhoto2.jpg # Посилання на фото
+
+  ПВ 04:
+    name: Фізика невпорядкованих систем
+    syllabus_url: https://drive.google.com/file/d/1sr9D_7WseBm71gWlA1ctOwDxBSFD-NMo/view
+
+  ПВ 05:
+    name: Методи дослідження збудливих мембран
+    syllabus_url: https://docs.google.com/document/d/1jKB9XUbpcWk0sx6A7wYvmYW2AXhBCltt/edit
+
+  ПВ 06:
+    name: Вейвлет аналіз сигналів
+    syllabus_url: https://drive.google.com/file/d/1crennYphnZD33-VIv9lTpC8y44EK6Sle/view
+
+  ПВ 07:
+    name: Спеціальні глави теорії теплообміну
+    syllabus_url: https://drive.google.com/file/d/1-viEUoeqgoeZEbun0d_36UKT_fLAsh3q/view
+
+  ПВ 08:
+    name: Біофізика мембранних структур
+
+  ПВ 09:
+    name: Фізика плазми
+    syllabus_url: https://drive.google.com/file/d/1e9EOICc2wiRxQCaO6hBb-zBl6xHNmBdj/view?usp=sharing
+    description: |
+      Метою курсу є підвищення загального рівня знань студентів, введення їх у коло явищ, які розглядає фізика плазмі, ознайомлення їх з основними термінами, поняттями, методами і ідеями, що були
+      розвинуті в цій науці, підготовка їх до самостійної роботи із оригінальною науковою літературою. Предметом вивчення є характерні явища в системах заряджених частинок: особливості колективного руху заряджених частинок завдяки їх електромагнітній взаємодії, та особливості індивідуального руху окремих заряджених частинок в електричних та магнітних полях.
+    lecturer:
+      full_name: Пономаренко Сергій Миколайович # Повне ім'я лектора
+      profile_url: https://apd.ipt.kpi.ua/kafedra/stuff/ponomarenko/ # Посилання на профіль
+      photo_url: https://apd.ipt.kpi.ua/wp-content/uploads/2025/01/MyPhoto2.jpg # Посилання на фото
+
+  ПВ 10:
+    name: Фізична кінетика
+    syllabus_url: https://drive.google.com/file/d/1iYd4Qa8QKB88MHFRdkwHZwcDWQBktgbZ/view
+
+  ПВ 11:
+    name: Енергозберігаючі технології
+
+  ПВ 12:
+    name: Експериментальні дослідницькі установки
+    syllabus_url: https://docs.google.com/document/d/1_8gfAGSkhm3AsR7RmyjEUixADjvaXQZ6/edit
+
+  ПВ 13:
+    name: Основи теорії примежового шару
+    syllabus_url: https://drive.google.com/file/d/1CWYovr9Vc1dWIat8ftVT7GQ4tbKAbVFx/view
+
+  ПВ 14:
+    name: Системи охолодження високотемпературних енергетичних установок
+    syllabus_url: https://docs.google.com/document/d/18E0luSlSDFGxpjIRw4PN6y-yG_5g8Rjd/edit
+
+  ПВ 15:
+    name: Новітні джерела енергії
+    syllabus_url: https://docs.google.com/document/d/1k_yVmdlzunZLk1Fll7aOjJa7KdVp66ty/edit

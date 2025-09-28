@@ -432,6 +432,7 @@ program_results:
   ПРН 16: Знання методів аналізу випадкових процесів, теорії ймовірності і математичної статистики, програмування, комп’ютерної графіки, прикладних програм і методів обчислень, методів розв’язання рівнянь математичної фізики, теорії функції комплексної змінної, тензорного аналізу для розуміння сучасних фізичних теорій і розв’язання проблем прикладної фізики та моделювання процесів у фізико-технічних системах.
   ПРН 17: Знання основ професійно-орієнтованих дисциплін спеціальності, зокрема хімії, ядерної фізики, статистичної радіофізики та оптики, електродинаміки суцільних середовищ для розв’язання практичних проблем прикладної фізики, в тому числі високих фізичних технологій та/або фізики живих систем та/або фізики енергетичних систем.
   ПРН 18: Вести здоровий спосіб життя
+
 mappings:
   ЗО 01: # Математичний аналіз
     competencies:
@@ -945,3 +946,111 @@ mappings:
       - ПРН 9
       - ПРН 14
       - ПРН 15
+
+elevative_disciplines:
+  ПВ 01:
+    name: Термодинаміка газового потоку
+    syllabus_url: https://drive.google.com/file/d/1xRw_nd2z_9TLQ957B9m5ATwJZT8bjfO6/view
+  ПВ 01.1:
+    name: Основи метрології в прикладній фізиці
+    syllabus_url: https://drive.google.com/file/d/18z37kCN3tNr9tmy54B9yOl6cAAZUv0AS/view
+  ПВ 01.2:
+    name: Органічна хімія живих систем
+  ПВ 02:
+    name: Основи теплової енергетики
+    syllabus_url: https://drive.google.com/file/d/18yTXqOJyE5yhKSPpdG8CYmekgCWJAbbT/view
+  ПВ 02.1:
+    name: Основи нанобіотехнологій
+  ПВ 02.2:
+    name: Фізика сучасних технологій та технологій майбутнього
+    syllabus_url: https://drive.google.com/file/d/1O-5jv5dTjipTlG2nJ9QcKA-jGLNwJJhk/view
+  ПВ 03:
+    name: Основи електроніки
+  ПВ 03.1:
+    name: "Електроніка: елементна база та ключові схеми"
+  ПВ 04:
+    name: Моделювання та аналіз даних у фізиці
+  ПВ 04.1:
+    name: Теорія теплопровідності
+    syllabus_url: https://drive.google.com/file/d/1RvPtEKjgCisd9B9DCc2ijST_GXq-em4K/view
+  ПВ 04.2:
+    name: Основи загальної біології
+    syllabus_url: https://drive.google.com/file/d/1K5FZ97Zil_2JqPjQsY2F3A5A-goH3cHc/view
+  ПВ 05:
+    name: Гідродинаміка
+    syllabus_url: https://drive.google.com/file/d/1in87dK6tDaTME-N8VKuel3-y9Ri95sm6/view
+  ПВ 05.1:
+    name: Цифрова схемотехніка
+    syllabus_url: https://drive.google.com/drive/u/4/folders/1DQ-JoZLoyE4PYdFJIeo_w4lgTfsod_HD
+  ПВ 05.2:
+    name: Електроніка для електрофізичних досліджень
+  ПВ 06:
+    name: Основи конвективного теплообміну
+    syllabus_url: https://drive.google.com/file/d/1iGEM4qNs-R8TB3sgQkkX_1Vr8LJRsfmT/view
+  ПВ 06.1:
+    name: Рентгенівські методи досліджень
+    syllabus_url: https://drive.google.com/file/d/1Hd2zdlLSQHdmqskQTLlCEXZm2dgOQW8n/view
+  ПВ 06.2:
+    name: Основи біохімії
+  ПВ 07:
+    name: Фізика ядерної та термоядерної енергетики
+    syllabus_url: https://drive.google.com/drive/u/2/folders/12chCGf10ePEkjmCqz9LGebnv4BUCzeow
+  ПВ 07.1:
+    name: Основи фізичного матеріалознавства
+    syllabus_url: https://docs.google.com/document/d/1uEUjbjj7ldTwZJQ7SJdTUUqhryQ-oktO/edit
+  ПВ 07.2:
+    name: Основи біофізики
+    syllabus_url: https://drive.google.com/file/d/1IWTzsLL2JHPMN5IdOSZiAvHs_iL5KwuG/view
+  ПВ 08:
+    name: Відновлювальні і альтернативні джерела енергії
+    syllabus_url: https://drive.google.com/file/d/1t6-tyO1vj55oAIRxkfPI_1sagu5RwRlb/view
+  ПВ 08.1:
+    name: Оптоелектроніка
+    syllabus_url: https://drive.google.com/file/d/1kEBpSxZPTRNAY9pw4MQGa3RqI19wdnnd/view
+  ПВ 09:
+    name: Воднева енергетика
+    syllabus_url: https://drive.google.com/file/d/1FYUrahgRrhGIyQG37cktsEKWzuOUxEHZ/view
+  ПВ 09.1:
+    name: Фізика напівпровідникових приладів
+    syllabus_url: https://docs.google.com/document/d/12gAbs6xXLvdDsFE_Du8lzaKH41mKZINI/edit
+  ПВ 09.2:
+    name: Наукові основи біосенсорики
+  ПВ 10:
+    name: Термодинаміка складних систем
+    syllabus_url: https://drive.google.com/file/d/1a5m5h8Ae4VO0f7QyUqa2Nan66qpXTUxD/view
+  ПВ 10.1:
+    name: Квантова електроніка
+  ПВ 10.2:
+    name: Біофізика складних систем Ч1
+  ПВ 11:
+    name: Комп'ютерне моделювання механіки суцільних середовищ
+    syllabus_url: https://drive.google.com/file/d/1r4qDF6k8r8GmPUe984cHmAoOXPUHf3tv/view
+  ПВ 11.1:
+    name: Комп'ютерне моделювання біофізичних систем
+    syllabus_url: https://drive.google.com/file/d/1wihJdrCOrduOSxEBPLR1_m3Lc7YReqh9/view
+  ПВ 11.2:
+    name: Методи машинного навчання
+    syllabus_url: https://drive.google.com/file/d/1tGHp7DxmMIK1gPRjdOO1WD00h5nFp79p/view
+  ПВ 12:
+    name: Фізика металів та сплавів
+    syllabus_url: https://drive.google.com/file/d/1MnI-DIQP4yslyXPwcGhKwcCbqfjmXDvk/view
+  ПВ 12.1:
+    name: Термодинаміка циклів
+    syllabus_url: https://drive.google.com/file/d/1G24k-zoRE0w76sQJATWtarSht4AQi6lc/view
+  ПВ 12.2:
+    name: Біофізика складних систем Ч2
+  ПВ 13:
+    name: Основи фотовольтаїки
+  ПВ 13.1:
+    name: Сучасні теоретичні методи у фізиці твердого тіла
+    syllabus_url: https://drive.google.com/file/d/1RZA7bJWcxifg3iSJqHUyAdNnklRarD3Q/view
+  ПВ 13.2:
+    name: Оптичні методи дослідження живих систем
+  ПВ 14:
+    name: Теорія гідродинамічної стійкості
+  ПВ 14.1:
+    name: Симетрія в фізиці
+    syllabus_url: https://drive.google.com/file/d/1cmw7Ip2WFmour8gH-cT8WpVdv2HJ2fO2/view
+  ПВ 14.2:
+    name: Статистичні методи в фізиці живих систем
+    syllabus_url: https://drive.google.com/file/d/1TK5EAL9Svd_tcxLx9EZbh9Cvrnd4O7g1/view

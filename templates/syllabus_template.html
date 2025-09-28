@@ -84,4 +84,16 @@
   </ul>
   {% endif %}
 
+    {% if elevate_disciplines %}
+    <h2 style="color: #495057 !important; border-bottom: 4px solid #28a745 !important; padding-bottom: 10px !important; margin: 30px 0 15px 0 !important;">
+        Вибіркові дисципліни
+    </h2>
+
+  <ul style="list-style: none !important; list-style-type: none !important; padding: 0 !important; margin: 0 !important;">
+    {% for d in elevate_disciplines %}
+      {{ discipline_card(d) }}
+    {% endfor %}
+  </ul>
+  {% endif %}
+
 </div>

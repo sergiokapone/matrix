@@ -56,6 +56,7 @@ def prepare_disciplines(disciplines):
     """Підготовка дисциплін для шаблону"""
     general = []
     professional = []
+    elevative = []
     
     for code in sorted(disciplines.keys(), key=lambda x: int(re.findall(r'\d+', x)[0])):
         discipline = disciplines[code]
@@ -78,31 +79,37 @@ def prepare_disciplines(disciplines):
         if code.startswith('ЗО'):
             general.append(item)
         elif code.startswith('ПО'):
-            # Перевіряємо чи це дослідницький компонент
             professional.append(item)
-    
-    return general, professional
+        elif code.startswith('ПВ'):
+            elevative.append(item)
+            
+    return general, professional, elevative
 
-def generate_content():
-    """Генерація HTML контенту"""
+def generate_content_with_template(template_path, yaml_file=None):
+    """Генерація HTML контенту з кастомним шаблоном"""
     # Завантажуємо дані
-    data = load_yaml_data()
+    data = load_yaml_data(yaml_file)
     metadata = data.get('metadata', {})
-    disciplines = data.get('disciplines', {})
-    
+    disciplines = data.get('disciplines', {}) | data.get('elevative_disciplines', {})  
     # Підготовуємо дисципліни
-    general, professional = prepare_disciplines(disciplines)
+    general, professional, elevate = prepare_disciplines(disciplines)
     
-    # Налаштовуємо Jinja2
-    env = Environment(loader=FileSystemLoader('templates'))
-    template = env.get_template('syllabus_page.html')
+    # Налаштовуємо Jinja2 з кастомним шляхом
+    import os
+    template_dir = os.path.dirname(template_path)
+    template_name = os.path.basename(template_path)
+    
+    env = Environment(loader=FileSystemLoader(template_dir or '.'))
+    template = env.get_template(template_name)
     
     # Контекст для шаблону
     context = {
+        'page_title': 'Силабуси освітньо-наукової програми підготовки магістрів',
         'metadata': metadata,
         'current_date': datetime.now().strftime('%d.%m.%Y'),
         'general_disciplines': general,
-        'professional_disciplines': professional
+        'professional_disciplines': professional, 
+        'elevate_disciplines': elevate, 
     }
     
     return template.render(context)
@@ -179,34 +186,6 @@ def main():
         print(f"❌ Помилка: {e}")
         exit(1)
 
-def generate_content_with_template(template_path, yaml_file=None):
-    """Генерація HTML контенту з кастомним шаблоном"""
-    # Завантажуємо дані
-    data = load_yaml_data(yaml_file)
-    metadata = data.get('metadata', {})
-    disciplines = data.get('disciplines', {})
-    
-    # Підготовуємо дисципліни
-    general, professional = prepare_disciplines(disciplines)
-    
-    # Налаштовуємо Jinja2 з кастомним шляхом
-    import os
-    template_dir = os.path.dirname(template_path)
-    template_name = os.path.basename(template_path)
-    
-    env = Environment(loader=FileSystemLoader(template_dir or '.'))
-    template = env.get_template(template_name)
-    
-    # Контекст для шаблону
-    context = {
-        'page_title': 'Силабуси освітньо-наукової програми підготовки магістрів',
-        'metadata': metadata,
-        'current_date': datetime.now().strftime('%d.%m.%Y'),
-        'general_disciplines': general,
-        'professional_disciplines': professional, 
-    }
-    
-    return template.render(context)
 
 if __name__ == "__main__":
     main()
