@@ -58,7 +58,14 @@ def load_discipline_data(yaml_file, discipline_code):
     """Завантажує дані дисципліни та лекторів"""
     data = load_yaml_data(yaml_file)
     lecturers = load_yaml_data(YAML_LECTURERS)
-    all_disciplines = {**data["disciplines"], **data["elevative_disciplines"]}
+
+    all_disciplines = data["disciplines"]
+
+    # Проверяем и объединяем выборочные дисциплины
+    if "elevative_disciplines" in data:
+        all_disciplines.update(data["elevative_disciplines"])
+
+    # all_disciplines = {**data["disciplines"], **data["elevative_disciplines"]}
 
     if discipline_code not in all_disciplines:
         print(f"❌ Дисципліна {discipline_code} не знайдена!")
@@ -232,7 +239,7 @@ def validate_yaml_file(yaml_file):
     return True
 
 
-def clean_output_directory(output_dir):
+def clean_output_directory(output_dir='disciplines'):
     """Видаляє директорію з усім вмістом"""
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
@@ -246,13 +253,14 @@ def handle_single_discipline(yaml_file, discipline_code, template):
     generate_discipline_page(yaml_file, discipline_code, output_file, template)
 
 
-def handle_all_disciplines(yaml_file, output_dir, template, clean):
+def handle_all_disciplines(yaml_file, clean=False):
     """Обробка генерації всіх дисциплін"""
+
+    output_dir = create_output_directory("disciplines")
     if clean:
         clean_output_directory(output_dir)
 
-    os.makedirs(output_dir, exist_ok=True)
-    generate_all_disciplines(yaml_file, output_dir, template)
+    generate_all_disciplines(yaml_file, output_dir)
 
 
 def handle_index_generation(yaml_file, output):
@@ -284,7 +292,7 @@ def read_html_file(file_path):
 
 
 def upload_html_files(disciplines_dir, yaml_data, parent_id):
-    """Завантаження всіх HTML файлів на WordPress"""
+    """Завантаження всіх HTML файлів на WordPress та підготовка YAML-структури"""
     wp_links = {}
     
     # Об'єднуємо обидва словники дисциплін
@@ -325,7 +333,19 @@ def upload_html_files(disciplines_dir, yaml_data, parent_id):
         else:
             print(f"❌ {title}: {message}")
 
-    return wp_links
+    # Собираем финальную структуру для сохранения в YAML
+    metadata = {
+        "year": yaml_data.get("metadata", {}).get("year", ""),
+        "degree": yaml_data.get("metadata", {}).get("degree", "")
+    }
+
+    wp_data = {
+        "year": metadata["year"],
+        "degree": metadata["degree"],
+        "links": wp_links
+    }
+
+    return wp_data
 
 def print_upload_summary(wp_links):
     """Виведення підсумкової інформації про завантаження"""
@@ -336,33 +356,23 @@ def print_upload_summary(wp_links):
     print("-" * 60)
 
 
-# def save_links_to_file(wp_links, output_file):
-#     """Збереження посилань у файл"""
-#     with open(output_file, "w", encoding="utf-8") as f:
-#         f.write("WP_LINKS = {\n")
-#         for code, link in sorted(wp_links.items()):
-#             f.write(f'    "{code}": "{link}",\n')
-#         f.write("}\n")
+def save_wp_links_yaml(wp_data, output_file="wp_links.yaml"):
+    """Сохраняет WP ссылки + метаданные в YAML"""
+    output_path = Path(output_file)
+    with open(output_path, "w", encoding="utf-8") as f:
+        yaml.dump(wp_data, f, allow_unicode=True)
+    print(f"📋 WP ссылки сохранены в {output_file}")
 
-#     print(f"📋 Словник WP_LINKS записано у файл {output_file}")
 
-def save_wp_links(wp_links: dict, yaml_file="wp_links.yaml", metadata=None):
-    """
-    Сохраняет WP ссылки вместе с метаданными в YAML.
-    wp_links: { "ПО 01": "https://..." }
-    metadata: { "year": "2024", "degree": "Бакалавр" }
-    """
-    data = metadata or {}
-    data["links"] = wp_links
-
-    with open(yaml_file, "w", encoding="utf-8") as f:
-        yaml.dump(data, f, allow_unicode=True)
-
-    print(f"📋 WP ссылки сохранены в {yaml_file}")
-
-def handle_upload(yaml_file, disciplines_dir):
+def handle_upload(yaml_file, disciplines_dir, check_dir=True):
     """Обробка завантаження на WordPress"""
     load_dotenv()
+
+    disciplines_path = Path(disciplines_dir)
+
+    if check_dir and not disciplines_path.exists():
+        print(f"❌ Папка {disciplines_dir} не існує! Спочатку згенеруйте сторінки за допомогою --all")
+        return
 
     yaml_data = load_yaml_data(yaml_file)
     parent_id = get_parent_id(yaml_data)
@@ -371,41 +381,18 @@ def handle_upload(yaml_file, disciplines_dir):
     print("🚀 Завантаження на WordPress...")
     print("-" * 60)
 
-    # wp_links = upload_html_files(disciplines_dir, yaml_data, parent_id)
+    wp_data = upload_html_files(disciplines_path, yaml_data, parent_id)
 
-    # print_upload_summary(wp_links)
-    # save_links_to_file(wp_links, Path("wp_links.py"))
-
-    wp_links = upload_html_files(disciplines_dir, yaml_data, parent_id)
-
-    metadata = {
-        "year": yaml_data.get("metadata", {}).get("year", ""),
-        "degree": yaml_data.get("metadata", {}).get("degree", "")
-    }
-
-    save_wp_links(wp_links, "wp_links.yaml", metadata)
-
-def handle_all_disciplines_with_upload(yaml_file, args):
-    """Обробка генерації всіх дисциплін з можливим завантаженням"""
-    output_dir = args.output if args.output else "disciplines"
-    handle_all_disciplines(yaml_file, output_dir, args.template, args.clean)
-    
-    if args.upload:
-        handle_upload(yaml_file, Path(output_dir))
+    save_wp_links_yaml(wp_data)
 
 
-def handle_upload_only(yaml_file, args):
-    """Обробка тільки завантаження існуючих файлів"""
-    output_dir = args.output if args.output else "disciplines"
-    disciplines_dir = Path(output_dir)
-    
-    if not disciplines_dir.exists():
-        print(f"❌ Папка {output_dir} не існує!")
-        print("💡 Спочатку згенеруйте сторінки за допомогою --all")
-        return
-    
-    handle_upload(yaml_file, disciplines_dir)
-
+# def handle_upload_only(yaml_file, args): 
+#     """Только загрузка в WP (без генерации)""" 
+#     output_dir = args.output if args.output else "disciplines" 
+#     disciplines_dir = Path(output_dir) 
+#     if not disciplines_dir.exists(): 
+#         print(f"❌ Папка {output_dir} не існує! Спочатку згенеруйте сторінки за допомогою --all") 
+#         return
 
 def get_index_slug(yaml_file):
     """Формирует slug для index страницы на основе year и degree"""
@@ -557,9 +544,10 @@ def main():
 
     # Словник дій CLI
     cli_actions = {
+        'clean': lambda: clean_output_directory(),
         'discipline': lambda: handle_single_discipline(yaml_file, args.discipline, args.template),
-        'all': lambda: handle_all_disciplines_with_upload(yaml_file, args),
-        'upload': lambda: handle_upload_only(yaml_file, args),
+        'all': lambda: handle_all_disciplines(yaml_file, args),
+        'upload': lambda: handle_upload(yaml_file, args.output or "disciplines", check_dir=True),
         'index': lambda: handle_index_generation(yaml_file, args.output),
         'parse_index': lambda: handle_parse_index(args.output),
         'upload_index': lambda: handle_upload_index(yaml_file, args.output),
