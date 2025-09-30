@@ -9,7 +9,6 @@ from interactive.filling import interactive_fill_mappings
 from core.data_validator import validate_data
 
 
-
 def handle_csv_conversion(csv_path_str):
     """Обробка конвертації CSV в YAML"""
     csv_path = Path(csv_path_str)

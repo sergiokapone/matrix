@@ -26,29 +26,32 @@
     </div>
     {% endif %}
 
-    <div class="discipline-info">
-        <div class="basic-info">
-            {% if discipline.credits %}
-            <p><strong>Кредити ЄКТС:</strong> {{ discipline.credits }}</p>
-            {% endif %}
-            <p><strong>Форма контролю:</strong> {{ discipline.control }}</p>
-            {% if discipline.syllabus_url %}
-            <p><strong>Силабус:</strong> <a href="{{ discipline.syllabus_url }}" target="_blank">Завантажити</a></p>
-            {% endif %}
-            {% if discipline.online_resources %}
-                <p><strong>Розміщення курсу:</strong> <a href="{{ discipline.online_resources }}" target="_blank">Переглянути</a></p>
-            {% endif %}
-        </div>
-
-
-        <!-- Контекст програми -->
-        <div class="program-context">
-            {% if metadata.website %}
-            <p><strong>Освітня програма:</strong> <a href="{{ metadata.website }}" target="_blank">Переглянути</a></p>
-            {% endif %}
-            <p><strong>Рівень освіти:</strong> {{ metadata.degree }}</p>
-            <p><strong>Рік програми:</strong> {{ metadata.year }}</p>
-            <p><strong>Університет:</strong> {{ metadata.university }}</p>
+    <div style="all: initial; display: block; font-family: inherit; font-size: inherit; color: inherit;">
+        <div style="display: flex; gap: 30px; margin-bottom: 30px; width: 100%; box-sizing: border-box;">
+            <div style="flex: 1 1 50%; max-width: 50%; box-sizing: border-box;">
+                <div class="basic-info" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff; box-sizing: border-box;">
+                    {% if discipline.credits %}
+                    <p style="margin: 0 0 10px 0; padding: 0;"><strong>Кредити ЄКТС:</strong> {{ discipline.credits }}</p>
+                    {% endif %}
+                    <p style="margin: 0 0 10px 0; padding: 0;"><strong>Форма контролю:</strong> {{ discipline.control }}</p>
+                    {% if discipline.syllabus_url %}
+                    <p style="margin: 0 0 10px 0; padding: 0;"><strong>Силабус:</strong> <a href="{{ discipline.syllabus_url }}" target="_blank">Завантажити</a></p>
+                    {% endif %}
+                    {% if discipline.online_resources %}
+                        <p style="margin: 0 0 10px 0; padding: 0;"><strong>Розміщення курсу:</strong> <a href="{{ discipline.online_resources }}" target="_blank">Переглянути</a></p>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="flex: 1 1 50%; max-width: 50%; box-sizing: border-box;">
+                <div class="program-context" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745; box-sizing: border-box;">
+                    {% if metadata.website %}
+                    <p style="margin: 0 0 10px 0; padding: 0;"><strong>Освітня програма:</strong> <a href="{{ metadata.website }}" target="_blank">Переглянути</a></p>
+                    {% endif %}
+                    <p style="margin: 0 0 10px 0; padding: 0;"><strong>Рівень освіти:</strong> {{ metadata.degree }}</p>
+                    <p style="margin: 0 0 10px 0; padding: 0;"><strong>Рік програми:</strong> {{ metadata.year }}</p>
+                    <!-- <p style="margin: 0 0 10px 0; padding: 0;"><strong>Університет:</strong> {{ metadata.university }}</p> -->
+                </div>
+            </div>
         </div>
     </div>
 

@@ -14,9 +14,6 @@ from handlers.handlers import handle_statistics_display
 from utils.file_utils import  check_file_exists
 
 
-
-
-
 def parse_command_line_args():
     """Парсинг аргументів командного рядка"""
     parser = argparse.ArgumentParser(description="Генератор матриць компетенцій")
@@ -76,30 +73,28 @@ def print_main_menu(yaml_file):
 
 def process_menu_choice(choice, yaml_file):
     """Обробка вибору користувача в меню"""
-    if choice == "1":
-        handle_interactive_filling(yaml_file)
-    elif choice == "2":
-        handle_excel_generation(yaml_file)
-    elif choice == "3":
-        handle_html_report(yaml_file)
-    elif choice == "4":
-        handle_statistics_display(yaml_file)
-    elif choice == "5":
-        handle_data_validation(yaml_file)
-    elif choice == "6":
-        handle_template_creation(yaml_file)
-    elif choice == "7":
-        new_file = handle_file_change()
-        if new_file:
-            return new_file
-    elif choice == "8":
-        handle_csv_submenu()
-    elif choice == "0":
+    
+    if choice == "0":
         print("👋 До побачення!")
         return "exit"
-    else:
-        print("❌ Невірний вибір! Оберіть від 0 до 8")
     
+    menu_actions = {
+        "1": handle_interactive_filling,
+        "2": handle_excel_generation,
+        "3": handle_html_report,
+        "4": handle_statistics_display,
+        "5": handle_data_validation,
+        "6": handle_template_creation,
+        "7": lambda _: handle_file_change(),
+        "8": handle_csv_submenu,
+    }
+    
+    action = menu_actions.get(choice)
+    if action:
+        result = action(yaml_file)
+        return result if result else yaml_file
+    
+    print("❌ Невірний вибір! Оберіть від 0 до 8")
     return yaml_file
 
 
@@ -124,10 +119,6 @@ def run_interactive_menu(yaml_file):
             print(f"❌ Помилка: {e}")
         
         input("\nНатисніть Enter для продовження...")
-
-
-
-
 
 def print_help_message():
     """Виведення довідкової інформації"""

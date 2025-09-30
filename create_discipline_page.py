@@ -5,10 +5,13 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from slugify import slugify
 from dotenv import load_dotenv
+from slugify import slugify
 
 from core.yaml_handler import load_yaml_data
 from core.wp_uploader import update_wordpress_page
 from core.path_validator import validate_paths
+
+from index_parser.index_parse import parse_index_links
 
 
 YAML_LECTURERS = Path("data") / "lecturers.yaml"
@@ -54,12 +57,14 @@ def load_discipline_data(yaml_file, discipline_code):
     """Завантажує дані дисципліни та лекторів"""
     data = load_yaml_data(yaml_file)
     lecturers = load_yaml_data(YAML_LECTURERS)
+    all_disciplines = {**data["disciplines"], **data["elevative_disciplines"]}
 
-    if discipline_code not in data["disciplines"]:
+    if discipline_code not in all_disciplines:
         print(f"❌ Дисципліна {discipline_code} не знайдена!")
         return None, None, None
 
-    discipline = data["disciplines"][discipline_code]
+    # Шукаємо дисципліну в обох словниках
+    discipline = all_disciplines[discipline_code]
 
     # Розгортаємо lecturer_id в повні дані лектора
     if "lecturer_id" in discipline:
@@ -152,7 +157,7 @@ def generate_all_disciplines(
 
     data = load_yaml_data(yaml_file)
     output_path = create_output_directory(output_dir)
-    disciplines = data.get("disciplines", {})
+    disciplines = data.get("disciplines", {}) | data.get("elevative_disciplines", {})
 
     print(f"🚀 Генерація сторінок для {len(disciplines)} дисциплін...")
     print(f"📄 Шаблон: {template_file}")
@@ -280,13 +285,16 @@ def read_html_file(file_path):
 def upload_html_files(disciplines_dir, yaml_data, parent_id):
     """Завантаження всіх HTML файлів на WordPress"""
     wp_links = {}
+    
+    # Об'єднуємо обидва словники дисциплін
+    all_disciplines = {**yaml_data['disciplines'], **yaml_data.get('elevative_disciplines', {})}
 
     for html_file in disciplines_dir.glob("*.html"):
         if html_file.name.lower() == "index.html":
             continue
 
         discipline_code = html_file.stem.replace('_', ' ')
-        discipline_info = yaml_data['disciplines'].get(discipline_code)
+        discipline_info = all_disciplines.get(discipline_code)
 
         if not discipline_info:
             print(f"❌ Дисципліна {discipline_code} не знайдена в YAML, пропускаємо...")
@@ -317,7 +325,6 @@ def upload_html_files(disciplines_dir, yaml_data, parent_id):
             print(f"❌ {title}: {message}")
 
     return wp_links
-
 
 def print_upload_summary(wp_links):
     """Виведення підсумкової інформації про завантаження"""
@@ -356,6 +363,105 @@ def handle_upload(yaml_file, disciplines_dir):
     save_links_to_file(wp_links, Path("wp_links.py"))
 
 
+def handle_all_disciplines_with_upload(yaml_file, args):
+    """Обробка генерації всіх дисциплін з можливим завантаженням"""
+    output_dir = args.output if args.output else "disciplines"
+    handle_all_disciplines(yaml_file, output_dir, args.template, args.clean)
+    
+    if args.upload:
+        handle_upload(yaml_file, Path(output_dir))
+
+
+def handle_upload_only(yaml_file, args):
+    """Обробка тільки завантаження існуючих файлів"""
+    output_dir = args.output if args.output else "disciplines"
+    disciplines_dir = Path(output_dir)
+    
+    if not disciplines_dir.exists():
+        print(f"❌ Папка {output_dir} не існує!")
+        print("💡 Спочатку згенеруйте сторінки за допомогою --all")
+        return
+    
+    handle_upload(yaml_file, disciplines_dir)
+
+
+def get_index_slug(yaml_file):
+    """Формирует slug для index страницы на основе year и degree"""
+    try:
+        year = yaml_file['metadata']['year']
+        degree = yaml_file['metadata']['degree']
+    except KeyError as e:
+        print(f"❌ В YAML нет ключа {e} в metadata для index slug")
+        sys.exit(1)
+
+    # латинизация и lower
+
+    slug = slugify(f"op_{degree}-{year}")
+    return slug
+
+
+def upload_index_page(yaml_data, index_file):
+    """Обновление index.html на WordPress по существующему ID"""
+    content = read_html_file(index_file)
+    if content is None:
+        return
+
+    page_id = yaml_data['metadata'].get('site_parrent_id')
+    if not page_id:
+        print("❌ В YAML нет ключа 'site_parrent_id' для обновления страницы index")
+        return
+
+    slug = get_index_slug(yaml_data)
+    title = f"Освітні компоненти: {yaml_data['metadata'].get('degree', '')} {yaml_data['metadata'].get('year', '')}"
+
+    success, link, message = update_wordpress_page(
+        content=content,
+        slug=slug,
+        data={
+            'title': title,
+            'slug': slug,
+            'parent': 16,
+            'status': 'publish'
+        },
+        page_id=page_id  # обновляем существующую страницу
+    )
+
+    if success:
+        print(f"✅ Index обновлен: {title} → {link}")
+        return link
+    else:
+        print(f"❌ Index: {message}")
+        return None
+
+
+def handle_upload_index(yaml_file, output_dir=None):
+    """Обработка загрузки index.html"""
+    yaml_data = load_yaml_data(yaml_file)
+
+    # По умолчанию папка вывода
+    output_dir = Path(output_dir) if output_dir else Path("disciplines")
+    index_file = output_dir / "index.html"
+
+    if not index_file.exists():
+        print(f"❌ Файл {index_file} не найден, сначала сгенерируйте его с --index")
+        return
+
+    upload_index_page(yaml_data, index_file)
+
+
+def handle_parse_index(output_dir=None):
+    """
+    Хендлер для CLI: вызывает функцию parse_index_links из модуля.
+    
+    yaml_file: путь к YAML (для совместимости, не используется)
+    output_dir: папка с index.html, по умолчанию 'disciplines'
+    """
+
+    output_dir = Path(output_dir) if output_dir else Path("disciplines")
+    index_file = output_dir / "index.html"
+    parse_index_links(index_file)
+
+
 def print_usage_examples():
     """Виводить приклади використання"""
     print("❌ Оберіть одну з опцій: --discipline, --all, --index, або --upload")
@@ -379,6 +485,9 @@ def parse_arguments():
     parser.add_argument(
         "--discipline", "-d", help="Код конкретної дисципліни для генерації"
     )
+
+    parser.add_argument("--upload-index", "-ui", action="store_true", help="Загрузить index.html на WordPress")
+
     parser.add_argument(
         "--template",
         "-t",
@@ -403,6 +512,11 @@ def parse_arguments():
         help="Завантажити згенеровані сторінки на WordPress"
     )
 
+    parser.add_argument(
+        "--parse-index", "-pi", action="store_true", help="Підставити в файл index.html посилання на сайт"
+    )
+
+
     return parser.parse_args()
 
 
@@ -414,29 +528,26 @@ def main():
     if not validate_yaml_file(yaml_file):
         return
 
-    if args.discipline:
-        handle_single_discipline(yaml_file, args.discipline, args.template)
-    elif args.all:
-        output_dir = args.output if args.output else "disciplines"
-        handle_all_disciplines(yaml_file, output_dir, args.template, args.clean)
+    # Словник дій CLI
+    cli_actions = {
+        'discipline': lambda: handle_single_discipline(yaml_file, args.discipline, args.template),
+        'all': lambda: handle_all_disciplines_with_upload(yaml_file, args),
+        'upload': lambda: handle_upload_only(yaml_file, args),
+        'index': lambda: handle_index_generation(yaml_file, args.output),
+        'parse_index': lambda: handle_parse_index(args.output),
+        'upload_index': lambda: handle_upload_index(yaml_file, args.output),
 
-        # Завантаження на WordPress після генерації
-        if args.upload:
-            handle_upload(yaml_file, Path(output_dir))
-    elif args.index:
-        handle_index_generation(yaml_file, args.output)
-    elif args.upload:
-        # Тільки завантаження існуючих файлів
-        output_dir = args.output if args.output else "disciplines"
-        disciplines_dir = Path(output_dir)
+    }
 
-        if not disciplines_dir.exists():
-            print(f"❌ Папка {output_dir} не існує!")
-            print("💡 Спочатку згенеруйте сторінки за допомогою --all")
-            return
+    # Визначаємо пріоритет команд
+    executed = False
+    for action_name in cli_actions.keys():
+        if getattr(args, action_name, False):
+            cli_actions[action_name]()
+            executed = True
 
-        handle_upload(yaml_file, disciplines_dir)
-    else:
+    # Якщо жодна команда не вказана
+    if not executed:
         print_usage_examples()
 
 
