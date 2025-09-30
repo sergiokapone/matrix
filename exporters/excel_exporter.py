@@ -1,5 +1,4 @@
 import pandas as pd
-import yaml
 
 from core.yaml_handler import load_yaml_data
 

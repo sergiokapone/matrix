@@ -6,7 +6,6 @@ import re
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 from datetime import datetime
-from dotenv import load_dotenv
 
 from core.yaml_handler import load_yaml_data
 from core.wp_uploader import update_wordpress_page
@@ -166,7 +165,7 @@ def parse_arguments():
     
     parser.add_argument('--page-id', 
                        type=int, 
-                       help=f'ID сторінки WordPress')
+                       help='ID сторінки WordPress')
     
     parser.add_argument('--yaml', 
                        default='data/program_data.yaml',

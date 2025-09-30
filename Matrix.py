@@ -1,7 +1,6 @@
 import argparse
 import sys
 from pathlib import Path
-from handlers.handlers import handle_csv_conversion
 from handlers.handlers import handle_interactive_filling
 from handlers.handlers import handle_excel_generation
 from handlers.handlers import handle_html_report

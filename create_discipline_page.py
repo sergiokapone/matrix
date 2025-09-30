@@ -6,6 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from slugify import slugify
 from dotenv import load_dotenv
 from slugify import slugify
+import yaml
 
 from core.yaml_handler import load_yaml_data
 from core.wp_uploader import update_wordpress_page
@@ -335,16 +336,29 @@ def print_upload_summary(wp_links):
     print("-" * 60)
 
 
-def save_links_to_file(wp_links, output_file):
-    """Збереження посилань у файл"""
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write("WP_LINKS = {\n")
-        for code, link in sorted(wp_links.items()):
-            f.write(f'    "{code}": "{link}",\n')
-        f.write("}\n")
+# def save_links_to_file(wp_links, output_file):
+#     """Збереження посилань у файл"""
+#     with open(output_file, "w", encoding="utf-8") as f:
+#         f.write("WP_LINKS = {\n")
+#         for code, link in sorted(wp_links.items()):
+#             f.write(f'    "{code}": "{link}",\n')
+#         f.write("}\n")
 
-    print(f"📋 Словник WP_LINKS записано у файл {output_file}")
+#     print(f"📋 Словник WP_LINKS записано у файл {output_file}")
 
+def save_wp_links(wp_links: dict, yaml_file="wp_links.yaml", metadata=None):
+    """
+    Сохраняет WP ссылки вместе с метаданными в YAML.
+    wp_links: { "ПО 01": "https://..." }
+    metadata: { "year": "2024", "degree": "Бакалавр" }
+    """
+    data = metadata or {}
+    data["links"] = wp_links
+
+    with open(yaml_file, "w", encoding="utf-8") as f:
+        yaml.dump(data, f, allow_unicode=True)
+
+    print(f"📋 WP ссылки сохранены в {yaml_file}")
 
 def handle_upload(yaml_file, disciplines_dir):
     """Обробка завантаження на WordPress"""
@@ -357,11 +371,19 @@ def handle_upload(yaml_file, disciplines_dir):
     print("🚀 Завантаження на WordPress...")
     print("-" * 60)
 
+    # wp_links = upload_html_files(disciplines_dir, yaml_data, parent_id)
+
+    # print_upload_summary(wp_links)
+    # save_links_to_file(wp_links, Path("wp_links.py"))
+
     wp_links = upload_html_files(disciplines_dir, yaml_data, parent_id)
 
-    print_upload_summary(wp_links)
-    save_links_to_file(wp_links, Path("wp_links.py"))
+    metadata = {
+        "year": yaml_data.get("metadata", {}).get("year", ""),
+        "degree": yaml_data.get("metadata", {}).get("degree", "")
+    }
 
+    save_wp_links(wp_links, "wp_links.yaml", metadata)
 
 def handle_all_disciplines_with_upload(yaml_file, args):
     """Обробка генерації всіх дисциплін з можливим завантаженням"""
@@ -463,15 +485,20 @@ def handle_parse_index(output_dir=None):
 
 
 def print_usage_examples():
-    """Виводить приклади використання"""
-    print("❌ Оберіть одну з опцій: --discipline, --all, --index, або --upload")
-    print("💡 Приклади:")
-    print("  python script.py data.yaml -d 'ПО 01'")
-    print("  python script.py data.yaml --all")
-    print("  python script.py data.yaml --all --upload")
-    print("  python script.py data.yaml --upload")
-    print("  python script.py data.yaml --index")
-    print("  python script.py data.yaml --all --template custom_template.html")
+    """Виводить приклади використання CLI з усіма доступними опціями"""
+    print("❌ Оберіть одну з опцій: --discipline, --all, --index, --parse-index, --upload, --upload-index")
+    print("💡 Приклади використання:")
+    print("  python create_discipline_page.py data.yaml -d 'ПО 01'                # Генерація однієї дисципліни")
+    print("  python create_discipline_page.py data.yaml --all                     # Генерація всіх дисциплін")
+    print("  python create_discipline_page.py data.yaml --all --upload            # Генерація та завантаження всіх дисциплін на WP")
+    print("  python create_discipline_page.py data.yaml --upload                  # Завантаження вже згенерованих сторінок")
+    print("  python create_discipline_page.py data.yaml --index                   # Генерація індексної сторінки")
+    print("  python create_discipline_page.py data.yaml --parse-index             # Підстановка WP посилань у index.html")
+    print("  python create_discipline_page.py data.yaml --upload-index            # Завантаження index.html на WP")
+    print("  python create_discipline_page.py data.yaml --index --parse-index --upload-index")
+    print("      # Генерація індексу, підстановка посилань і завантаження на WP")
+    print("  python create_discipline_page.py data.yaml --all --template custom_template.html")
+
 
 
 def parse_arguments():

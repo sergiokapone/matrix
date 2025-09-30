@@ -33,7 +33,7 @@ def show_statistics(yaml_file="curriculum.yaml"):
         for comp in mapping.get("competencies", []):
             comp_usage[comp] = comp_usage.get(comp, 0) + 1
 
-    print(f"\n🎯 ВИКОРИСТАННЯ КОМПЕТЕНЦІЙ:")
+    print("\n🎯 ВИКОРИСТАННЯ КОМПЕТЕНЦІЙ:")
     print("-" * 30)
     for comp_code in sorted(competencies.keys()):
         count = comp_usage.get(comp_code, 0)
@@ -45,7 +45,7 @@ def show_statistics(yaml_file="curriculum.yaml"):
         for prog in mapping.get("program_results", []):
             prog_usage[prog] = prog_usage.get(prog, 0) + 1
 
-    print(f"\n📋 ВИКОРИСТАННЯ ПРОГРАМНИХ РЕЗУЛЬТАТІВ:")
+    print("\n📋 ВИКОРИСТАННЯ ПРОГРАМНИХ РЕЗУЛЬТАТІВ:")
     print("-" * 30)
     for prog_code in sorted(program_results.keys()):
         count = prog_usage.get(prog_code, 0)

@@ -221,13 +221,13 @@ def validate_csv_before_conversion(csv_file):
         for i, col in enumerate(df.columns):
             print(f"  {i+1}. {col}")
 
-        print(f"\n📖 Перші 3 рядки:")
+        print("\n📖 Перші 3 рядки:")
         print(df.head(3).to_string())
 
         # Перевірка на порожні клітинки
         empty_cells = df.isnull().sum()
         if empty_cells.any():
-            print(f"\n⚠️ Порожні клітинки:")
+            print("\n⚠️ Порожні клітинки:")
             for col, count in empty_cells.items():
                 if count > 0:
                     print(f"  {col}: {count} порожніх")
