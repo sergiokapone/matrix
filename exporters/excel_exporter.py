@@ -12,8 +12,6 @@ def generate_matrices_from_yaml(
 
     # Завантажуємо YAML
     config = load_yaml_data(yaml_file)
-    # with open(yaml_file, "r", encoding="utf-8") as f:
-    #     config = yaml.safe_load(f)
 
     metadata = config.get("metadata", {})
     disciplines = config["disciplines"]
@@ -45,13 +43,22 @@ def generate_matrices_from_yaml(
                     prog_df.at[prog_code, discipline_code] = "+"
 
     # Створюємо багаторівневі заголовки колонок
+    # 🔧 ВИПРАВЛЕННЯ: отримуємо назву дисципліни
     comp_columns = pd.MultiIndex.from_tuples(
-        [(disciplines[code], code) for code in comp_df.columns],
+        [
+            (disciplines[code].get("name", code) if isinstance(disciplines[code], dict) else disciplines[code], 
+             code) 
+            for code in comp_df.columns
+        ],
         names=["Дисципліна", "Код"],
     )
 
     prog_columns = pd.MultiIndex.from_tuples(
-        [(disciplines[code], code) for code in prog_df.columns],
+        [
+            (disciplines[code].get("name", code) if isinstance(disciplines[code], dict) else disciplines[code], 
+             code) 
+            for code in prog_df.columns
+        ],
         names=["Дисципліна", "Код"],
     )
 
@@ -65,7 +72,10 @@ def generate_matrices_from_yaml(
 
         # === ЗВЕДЕНА ТАБЛИЦЯ ===
         summary_data = []
-        for disc_code, disc_name in disciplines.items():
+        for disc_code, disc_info in disciplines.items():
+            # 🔧 ВИПРАВЛЕННЯ: обробка словника або рядка
+            disc_name = disc_info.get("name", disc_code) if isinstance(disc_info, dict) else disc_info
+            
             mapping = mappings.get(disc_code, {})
             comps = mapping.get("competencies", [])
             progs = mapping.get("program_results", [])

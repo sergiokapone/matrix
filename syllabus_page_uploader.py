@@ -1,109 +1,102 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import yaml
-import requests
-from requests.auth import HTTPBasicAuth
-from jinja2 import Environment, FileSystemLoader
 import os
-from datetime import datetime
 import re
+from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
+from datetime import datetime
 from dotenv import load_dotenv
 
-# Конфігурація
-WP_SITE_URL = "https://apd.ipt.kpi.ua"
-load_dotenv()  # Завантаження змінних оточення з .env файлу
-WP_AUTH = (os.getenv("WP_USER"), os.getenv("WP_PASSWORD"))
-WP_URL = "https://apd.ipt.kpi.ua/wp-json/wp/v2/pages"
+from core.yaml_handler import load_yaml_data
+from core.wp_uploader import update_wordpress_page
+from core.wp_uploader import WP_URL
 
-def update_wordpress_page(content, page_id=None, site_url=None):
-    """Оновлення сторінки WordPress"""
-    if site_url is None:
-        site_url = WP_SITE_URL
-        
-    url = f"{site_url}/wp-json/wp/v2/pages/{page_id}"
-    # auth = HTTPBasicAuth(WP_USERNAME, WP_PASSWORD)
-    
-    data = {
-        'content': content,
-        'status': 'publish'
+
+YAML_LECTURERS = Path("data") / "lecturers.yaml"
+
+
+def load_lecturers_data():
+    """Завантаження даних лекторів"""
+    return load_yaml_data(YAML_LECTURERS)
+
+
+def extract_discipline_code_number(code):
+    """Витягує номер з коду дисципліни для сортування"""
+    numbers = re.findall(r'\d+', code)
+    return int(numbers[0]) if numbers else 0
+
+
+def enrich_discipline_with_lecturer(discipline, lecturers):
+    """Додає повні дані лектора до дисципліни"""
+    if "lecturer_id" in discipline:
+        lecturer_id = discipline["lecturer_id"]
+        discipline["lecturer"] = lecturers.get(lecturer_id)
+    return discipline
+
+
+def create_discipline_item(code, discipline):
+    """Створює словник з даними дисципліни для шаблону"""
+    return {
+        'code': code,
+        'name': discipline['name'],
+        'credits': discipline.get('credits', 'N/A'),
+        'control': discipline.get('control', 'N/A'),
+        'syllabus_url': discipline.get('syllabus_url'),
+        'description': discipline.get('description', ''),
+        'lecturer': discipline.get('lecturer'),
+        'subdisciplines': discipline.get('subdisciplines', {}),
     }
-    
-    check_response = requests.get(WP_URL, auth=WP_AUTH)
 
-    if check_response.status_code == 200:
-        existing_pages = check_response.json()
-        if existing_pages:
-            # page_id = existing_pages[0]['id']
-            print(f"♻️ Оновлюємо існуючу сторінку з id={page_id})")
 
-            # Оновлюємо сторінку через POST (бо PUT/DELETE заборонені сервером)
-            update_url = f"{WP_URL}/{page_id}"
-            update_response = requests.post(update_url, json=data, auth=WP_AUTH)
+def categorize_discipline(code, item, general, professional, elevative):
+    """Розподіляє дисципліну по категоріях"""
+    if code.startswith('ЗО'):
+        general.append(item)
+    elif code.startswith('ПО'):
+        professional.append(item)
+    elif code.startswith('ПВ'):
+        elevative.append(item)
 
-            if update_response.status_code == 200:
-                created_link = update_response.json().get('link')
-                print(f"✅ Оновлено сторінку: {created_link}")
-            else:
-                print(f"❌ Помилка оновлення: {update_response.status_code} → {update_response.text}")
-
-def load_yaml_data(yaml_file=None):
-    """Завантаження даних з YAML"""
-    with open(yaml_file, 'r', encoding='utf-8') as f:
-        return yaml.safe_load(f)
 
 def prepare_disciplines(disciplines):
     """Підготовка дисциплін для шаблону"""
     general = []
     professional = []
     elevative = []
-    
-    for code in sorted(disciplines.keys(), key=lambda x: int(re.findall(r'\d+', x)[0])):
-        discipline = disciplines[code]
-        
-        # Форматування посилання
-        name = discipline['name']
 
-        
-        item = {
-            'code': code,
-            'name': name,
-            'credits': discipline.get('credits', 'N/A'),
-            'control': discipline.get('control', 'N/A'),
-            'syllabus_url': discipline.get('syllabus_url'),
-            'description': discipline.get('description', ''),
-            'lecturer': discipline.get('lecturer'),
-            'subdisciplines': discipline.get('subdisciplines', {}),
-        }
-        
-        if code.startswith('ЗО'):
-            general.append(item)
-        elif code.startswith('ПО'):
-            professional.append(item)
-        elif code.startswith('ПВ'):
-            elevative.append(item)
+    lecturers = load_lecturers_data()
+    
+    sorted_codes = sorted(disciplines.keys(), key=extract_discipline_code_number)
+    
+    for code in sorted_codes:
+        discipline = disciplines[code]
+        discipline = enrich_discipline_with_lecturer(discipline, lecturers)
+        item = create_discipline_item(code, discipline)
+        categorize_discipline(code, item, general, professional, elevative)
             
     return general, professional, elevative
 
-def generate_content_with_template(template_path, yaml_file=None):
-    """Генерація HTML контенту з кастомним шаблоном"""
-    # Завантажуємо дані
+
+def load_program_data(yaml_file):
+    """Завантаження даних програми з YAML"""
     data = load_yaml_data(yaml_file)
     metadata = data.get('metadata', {})
-    disciplines = data.get('disciplines', {}) | data.get('elevative_disciplines', {})  
-    # Підготовуємо дисципліни
-    general, professional, elevate = prepare_disciplines(disciplines)
-    
-    # Налаштовуємо Jinja2 з кастомним шляхом
-    import os
+    disciplines = data.get('disciplines', {}) | data.get('elevative_disciplines', {})
+    return metadata, disciplines
+
+
+def setup_jinja_environment(template_path):
+    """Налаштування Jinja2 Environment"""
     template_dir = os.path.dirname(template_path)
     template_name = os.path.basename(template_path)
-    
     env = Environment(loader=FileSystemLoader(template_dir or '.'))
-    template = env.get_template(template_name)
-    
-    # Контекст для шаблону
-    context = {
+    return env, template_name
+
+
+def create_template_context(metadata, general, professional, elevate):
+    """Створення контексту для шаблону"""
+    return {
         'page_title': 'Силабуси освітньо-наукової програми підготовки магістрів',
         'metadata': metadata,
         'current_date': datetime.now().strftime('%d.%m.%Y'),
@@ -111,12 +104,48 @@ def generate_content_with_template(template_path, yaml_file=None):
         'professional_disciplines': professional, 
         'elevate_disciplines': elevate, 
     }
+
+
+def generate_content_with_template(template_path, yaml_file=None):
+    """Генерація HTML контенту з кастомним шаблоном"""
+    metadata, disciplines = load_program_data(yaml_file)
+    general, professional, elevate = prepare_disciplines(disciplines)
+    
+    env, template_name = setup_jinja_environment(template_path)
+    template = env.get_template(template_name)
+    
+    context = create_template_context(metadata, general, professional, elevate)
     
     return template.render(context)
 
 
-def main():
-    """Головна функція з CLI опціями"""
+def save_preview_file(content, preview_file):
+    """Збереження превью HTML файлу"""
+    html_wrapper = (
+        f'<!DOCTYPE html>'
+        f'<html>'
+        f'<head><meta charset="UTF-8"><title>Превью силабусів</title></head>'
+        f'<body>{content}</body>'
+        f'</html>'
+    )
+    
+    with open(preview_file, 'w', encoding='utf-8') as f:
+        f.write(html_wrapper)
+    
+    print(f"👀 Превью збережено в {preview_file}")
+
+
+def upload_to_wordpress(content, page_id, site_url):
+    """Завантаження контенту на WordPress"""
+    print(f"🌐 Оновлення сторінки ID: {page_id}")
+    success = update_wordpress_page(content, page_id, site_url)
+    if success:
+        print("🎉 Готово!")
+    return success
+
+
+def parse_arguments():
+    """Парсинг аргументів командного рядка"""
     import argparse
     
     parser = argparse.ArgumentParser(
@@ -148,40 +177,49 @@ def main():
                        help='Шлях до шаблону (за замовчуванням: templates/syllabus_template.html)')
     
     parser.add_argument('--site-url', 
-                       default=WP_SITE_URL,
-                       help=f'URL сайту (за замовчуванням: {WP_SITE_URL})')
+                       default=WP_URL,
+                       help=f'URL сайту (за замовчуванням: {WP_URL})')
     
     parser.add_argument('--preview-file', 
                        default='preview.html',
                        help='Ім\'я файлу превью (за замовчуванням: preview.html)')
     
+    return parser.parse_args()
 
-    
-    args = parser.parse_args()
-    
+
+def print_generation_info(args):
+    """Виведення інформації про генерацію"""
     print("🚀 Генерація силабусів...")
     print(f"📁 YAML файл: {args.yaml}")
     print(f"📄 Шаблон: {args.template}")
+
+
+def handle_preview_only_mode():
+    """Обробка режиму тільки превью"""
+    print("📋 Режим тільки превью - WordPress не оновлюється")
+
+
+def process_syllabi_generation(args):
+    """Основна логіка генерації силабусів"""
+    print_generation_info(args)
+    
+    content = generate_content_with_template(args.template, args.yaml)
+    print("📝 Контент згенеровано")
+    
+    save_preview_file(content, args.preview_file)
+    
+    if not args.preview_only:
+        upload_to_wordpress(content, args.page_id, args.site_url)
+    else:
+        handle_preview_only_mode()
+
+
+def main():
+    """Головна функція з CLI опціями"""
+    args = parse_arguments()
     
     try:
-        # Генеруємо контент з параметрами з CLI
-        content = generate_content_with_template(args.template, args.yaml)
-        print("📝 Контент згенеровано")
-        
-        # Збереження превью
-        with open(args.preview_file, 'w', encoding='utf-8') as f:
-            f.write(f'<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Превью силабусів</title></head><body>{content}</body></html>')
-        print(f"👀 Превью збережено в {args.preview_file}")
-        
-        # Оновлення WordPress (якщо не тільки превью)
-        if not args.preview_only:
-            print(f"🌐 Оновлення сторінки ID: {args.page_id}")
-            success = update_wordpress_page(content, args.page_id, args.site_url)
-            if success:
-                print("🎉 Готово!")
-        else:
-            print("📋 Режим тільки превью - WordPress не оновлюється")
-        
+        process_syllabi_generation(args)
     except Exception as e:
         print(f"❌ Помилка: {e}")
         exit(1)
