@@ -32,7 +32,10 @@ def generate_html_report(yaml_file="curriculum.yaml"):
     # Папка, де лежить main.py
     base_dir = Path.cwd()
 
-    temp_file = base_dir / Path(yaml_file).with_suffix(".html").name
+    gh_pages_dir = base_dir / "gh-pages"
+
+
+    temp_file = gh_pages_dir / Path(yaml_file).with_suffix(".html").name
 
     with open(temp_file, "w", encoding="utf-8") as f:
         f.write(html_content)
