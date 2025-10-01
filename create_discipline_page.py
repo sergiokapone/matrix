@@ -275,9 +275,9 @@ def handle_index_generation(yaml_file, output):
 def get_parent_id(yaml_data):
     """Отримання PARENT_ID з YAML"""
     try:
-        return yaml_data['metadata']['site_parrent_id']
+        return yaml_data['metadata']['page_id']
     except KeyError:
-        print("❌ У YAML немає ключа 'site_parrent_id' у metadata")
+        print("❌ У YAML немає ключа 'page_id' у metadata")
         sys.exit(1)
 
 
@@ -383,7 +383,9 @@ def handle_upload(yaml_file, disciplines_dir, check_dir=True):
 
     wp_data = upload_html_files(disciplines_path, yaml_data, parent_id)
 
-    save_wp_links_yaml(wp_data)
+    yaml_name = Path(yaml_file).stem
+
+    save_wp_links_yaml(wp_data, f"wp_links_{yaml_name}.yaml")
 
 
 # def handle_upload_only(yaml_file, args): 
@@ -415,9 +417,9 @@ def upload_index_page(yaml_data, index_file):
     if content is None:
         return
 
-    page_id = yaml_data['metadata'].get('site_parrent_id')
+    page_id = yaml_data['metadata'].get('page_id')
     if not page_id:
-        print("❌ В YAML нет ключа 'site_parrent_id' для обновления страницы index")
+        print("❌ В YAML нет ключа 'page_id' для обновления страницы index")
         return
 
     slug = get_index_slug(yaml_data)
@@ -458,7 +460,7 @@ def handle_upload_index(yaml_file, output_dir=None):
     upload_index_page(yaml_data, index_file)
 
 
-def handle_parse_index(output_dir=None):
+def handle_parse_index(yaml_file, output_dir=None):
     """
     Хендлер для CLI: вызывает функцию parse_index_links из модуля.
     
@@ -468,7 +470,7 @@ def handle_parse_index(output_dir=None):
 
     output_dir = Path(output_dir) if output_dir else Path("disciplines")
     index_file = output_dir / "index.html"
-    parse_index_links(index_file)
+    parse_index_links(index_file, data_yaml=yaml_file)
 
 
 def print_usage_examples():
@@ -549,7 +551,7 @@ def main():
         'all': lambda: handle_all_disciplines(yaml_file, args),
         'upload': lambda: handle_upload(yaml_file, args.output or "disciplines", check_dir=True),
         'index': lambda: handle_index_generation(yaml_file, args.output),
-        'parse_index': lambda: handle_parse_index(args.output),
+        'parse_index': lambda: handle_parse_index(yaml_file, args.output),
         'upload_index': lambda: handle_upload_index(yaml_file, args.output),
 
     }

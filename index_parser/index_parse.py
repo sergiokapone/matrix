@@ -2,7 +2,7 @@ import yaml
 from pathlib import Path
 import re
 
-def parse_index_links(index_file_path="disciplines/index.html", wp_links_yaml="wp_links.yaml", metadata_yaml=None):
+def parse_index_links(index_file_path="disciplines/index.html", data_yaml=None):
     """
     Подставляет WP ссылки в index.html из YAML.
     Проверяет year и degree перед заменой.
@@ -11,6 +11,9 @@ def parse_index_links(index_file_path="disciplines/index.html", wp_links_yaml="w
     if not index_file.exists():
         print(f"❌ Файл {index_file} не найден")
         return
+    
+    data_yaml_stem = Path(data_yaml).stem
+    wp_links_yaml = f"wp_links_{data_yaml_stem}.yaml"
 
     # Загружаем WP ссылки из YAML
     with open(wp_links_yaml, encoding="utf-8") as f:
@@ -20,8 +23,8 @@ def parse_index_links(index_file_path="disciplines/index.html", wp_links_yaml="w
     wp_degree = wp_data.get("degree", "")
 
     # Проверяем соответствие метаданных с основным YAML (если указан)
-    if metadata_yaml:
-        with open(metadata_yaml, encoding="utf-8") as f:
+    if data_yaml:
+        with open(data_yaml, encoding="utf-8") as f:
             meta_data = yaml.safe_load(f)
         year = meta_data.get("metadata", {}).get("year", "")
         degree = meta_data.get("metadata", {}).get("degree", "")

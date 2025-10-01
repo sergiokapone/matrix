@@ -17,18 +17,50 @@
         </style>
     </head>
     <body> -->
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-            <h1>{{ metadata.title }}</h1>
-            <div style="margin-bottom: 20px; font-size: 0.95em; color: #495057;">
+        <div style="background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <h1 style="color: #1f3c88; font-size: 1.8em; margin-bottom: 15px;">{{ metadata.title }}</h1>
+            
+            <div style="font-size: 0.95em; color: #495057; line-height: 1.6; margin-bottom: 20px;">
                 <p><strong>Університет:</strong> {{ metadata.university }}</p>
-                <p><strong>Інститут / Кафедра:</strong> {{ metadata.faculty }} | {{ metadata.department }}</p>
-                <p><strong>Рівень освіти:</strong> {{ metadata.degree }}</p>
+                <p><strong>Інститут | Кафедра:</strong> {{ metadata.faculty }} | {{ metadata.department }}</p>
+                <p><strong>Спеціальність:</strong> {{ metadata.specialty }}</p>
+                <p><strong>Рівень освіти:</strong> {{ metadata.degree }} (NQF: {{ metadata.nqf_level }}, EQF: {{ metadata.eqf_lll }}, EHEA: {{ metadata.qf_ehea }})</p>
                 <p><strong>Рік програми:</strong> {{ metadata.year }}</p>
+                <p><strong>Тривалість:</strong> {{ metadata.duration }}</p>
+                <p><strong>Форма навчання:</strong> {{ metadata.form }}</p>
                 {% if metadata.language %}<p><strong>Мова навчання:</strong> {{ metadata.language }}</p>{% endif %}
-                {% if metadata.duration %}<p><strong>Тривалість:</strong> {{ metadata.duration }}</p>{% endif %}
-                {% if metadata.website %}<p><strong>Посилання на програму:</strong> <a href="{{ metadata.website }}" target="_blank">{{ metadata.website }}</a></p>{% endif %}
+                {% if metadata.website %}<p><strong>Посилання на програму:</strong> <a href="{{ metadata.website }}" target="_blank" style="color: #1f3c88; text-decoration: underline;">{{ metadata.website }}</a></p>{% endif %}
+                <p><strong>Кредити:</strong> {{ metadata.total_credits }} ECTS</p>
+            </div>
+
+            <hr style="border: 0; border-top: 2px solid #e0e0e0; margin: 20px 0;">
+
+            <div style="margin-bottom: 20px;">
+                <h2 style="color: #1f3c88; font-size: 1.4em; margin-bottom: 10px;">Мета програми</h2>
+                <p style="color: #495057;">{{ metadata.program_purpose }}</p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h2 style="color: #1f3c88; font-size: 1.4em; margin-bottom: 10px;">Основний фокус</h2>
+                <p style="color: #495057;">{{ metadata.main_focus }}</p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h2 style="color: #1f3c88; font-size: 1.4em; margin-bottom: 10px;">Особливості програми</h2>
+                <p style="color: #495057;">{{ metadata.features }}</p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h2 style="color: #1f3c88; font-size: 1.4em; margin-bottom: 10px;">Інтегральна компетентність</h2>
+                <p style="color: #495057;">{{ metadata.integral_competence }}</p>
+            </div>
+
+            <div style="margin-bottom: 0;">
+                <h2 style="color: #1f3c88; font-size: 1.4em; margin-bottom: 10px;">Форма атестації</h2>
+                <p style="color: #495057;">{{ metadata.attestation_form }}</p>
             </div>
         </div>
+
 
         {% set zo_disciplines = [] %}
         {% set po_disciplines = [] %}

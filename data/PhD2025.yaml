@@ -18,15 +18,15 @@ metadata:
   created_date: "2018"
   last_updated: "2025-04-30"
 
-program_purpose:
-  ua: |
-    Підготовка фахівців найвищої кваліфікації, здатних продукувати нові ідеї, розв'язувати комплексні проблеми у певній галузі професійної та/або дослідницько-інноваційної діяльності, застосовувати методологію наукової та педагогічної діяльності, а також проводити власне наукове дослідження, результати якого мають наукову новизну, теоретичне та практичне значення.
-  en: |
-    Training of highly qualified specialists capable of generating new ideas, solving complex problems in a certain area of professional and/or research and innovation activity, applying the methodology of scientific and pedagogical activities, as well as conducting their own scientific research, the results of which have scientific novelty, theoretical and practical significance.
+  program_purpose:
+    ua: |
+      Підготовка фахівців найвищої кваліфікації, здатних продукувати нові ідеї, розв'язувати комплексні проблеми у певній галузі професійної та/або дослідницько-інноваційної діяльності, застосовувати методологію наукової та педагогічної діяльності, а також проводити власне наукове дослідження, результати якого мають наукову новизну, теоретичне та практичне значення.
+    en: |
+      Training of highly qualified specialists capable of generating new ideas, solving complex problems in a certain area of professional and/or research and innovation activity, applying the methodology of scientific and pedagogical activities, as well as conducting their own scientific research, the results of which have scientific novelty, theoretical and practical significance.
 
-integral_competence:
-  ua: "Здатність продукувати нові ідеї, розв'язувати комплексні проблеми у певній галузі професійної та/або дослідницько-інноваційної діяльності, застосовувати методологію наукової та педагогічної діяльності, а також проводити власне наукове дослідження, результати якого мають наукову новизну, теоретичне та практичне значення."
-  en: "The ability to generate new ideas, solve complex problems in a certain area of professional and/or research and innovation activity, apply the methodology of scientific and pedagogical activities, as well as conduct one's own scientific research, the results of which have scientific novelty, theoretical and practical significance."
+  integral_competence:
+    ua: "Здатність продукувати нові ідеї, розв'язувати комплексні проблеми у певній галузі професійної та/або дослідницько-інноваційної діяльності, застосовувати методологію наукової та педагогічної діяльності, а також проводити власне наукове дослідження, результати якого мають наукову новизну, теоретичне та практичне значення."
+    en: "The ability to generate new ideas, solve complex problems in a certain area of professional and/or research and innovation activity, apply the methodology of scientific and pedagogical activities, as well as conduct one's own scientific research, the results of which have scientific novelty, theoretical and practical significance."
 
 disciplines:
   # Обов'язкові компоненти циклу загальної підготовки
