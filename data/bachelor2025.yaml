@@ -150,11 +150,13 @@ disciplines:
     name: "Теоретична підготовка базової загальновійськової підготовки / Цивільний захист, оборона та патріотичне виховання"
     credits: 3.0
     control: Залік
+    syllabus_url: https://osvita.kpi.ua/sites/default/files/files/Syllabus_Teoretychna-pidhotovka-bazovoi-zahalnoviiskovoi-pidhotovky_denna_25-26.pdf
 
   ЗО 18:
     name: Права і свободи людини
     credits: 2.0
     control: Залік
+    syllabus_url: https://osvita.kpi.ua/sites/default/files/files/Prava_i_svobody_liudyny_denna_24-25.pdf
 
   ЗО 19:
     name: Хімія
