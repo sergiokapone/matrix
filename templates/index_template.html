@@ -18,7 +18,7 @@
     </head>
     <body> -->
         <div style="background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-            <h1 style="color: #1f3c88; font-size: 1.8em; margin-bottom: 15px;">{{ metadata.title }}</h1>
+            <h1 style="color: #1f3c88; font-size: 1.8em; margin-bottom: 15px; font-weight: bold; text-align: center;">{{ metadata.title }}</h1>
             
             <div style="font-size: 0.95em; color: #495057; line-height: 1.6; margin-bottom: 20px;">
                 <p><strong>Університет:</strong> {{ metadata.university }}</p>
@@ -111,7 +111,6 @@
         {{ render_disciplines("Вибіркові компоненти циклу професійної підготовки", pv_disciplines) }}
         {{ render_disciplines("Нормативні освітні компоненти", nk_disciplines) }}
         {{ render_disciplines("Вибіркові освітні компоненти", vk_disciplines) }}
-
 
     <!-- </body>
     </html> -->
