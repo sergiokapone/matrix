@@ -63,6 +63,9 @@
         <div class="subdiscipline">
             <h3>{{ sub_code }}: {{ subdiscipline.name }}</h3>
             <p><strong>Кредити:</strong> {{ subdiscipline.credits }} ЄКТС | <strong>Контроль:</strong> {{ subdiscipline.control }}</p>
+            {% if subdiscipline.syllabus_url %}
+                <p style="margin: 0 0 10px 0; padding: 0;"><strong>Силабус:</strong> <a href="{{ subdiscipline.syllabus_url }}" target="_blank">Завантажити</a></p>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
