@@ -33,7 +33,7 @@ def parse_index_links(index_file_path="disciplines/index.html", data_yaml=None):
             return
 
     html = index_file.read_text(encoding="utf-8")
-    pattern = re.compile(r'href="((ЗО|ПО|ПВ)[ _]\d{2}(?:\.\d+)?)\.html"')
+    pattern = re.compile(r'href="((ЗО|ПО|ПВ|НК|ВК)[ _]\d{2}(?:\.\d+)?)\.html"')
 
     def replace_href(match):
         code = match.group(1).replace('_', ' ').strip()

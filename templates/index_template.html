@@ -65,6 +65,8 @@
         {% set zo_disciplines = [] %}
         {% set po_disciplines = [] %}
         {% set pv_disciplines = [] %}
+        {% set nk_disciplines = [] %}
+        {% set vk_disciplines = [] %}
         
         {% for code, discipline in disciplines.items() %}
             {% if code.startswith('ЗО') %}
@@ -73,6 +75,10 @@
                 {% set _ = po_disciplines.append((code, discipline)) %}
             {% elif code.startswith('ПВ') %}
                 {% set _ = pv_disciplines.append((code, discipline)) %}
+            {% elif code.startswith('НК') %}
+                {% set _ = nk_disciplines.append((code, discipline)) %}
+            {% elif code.startswith('ВК') %}
+                {% set _ = vk_disciplines.append((code, discipline)) %}
             {% endif %}
         {% endfor %}
 
@@ -103,6 +109,8 @@
         {{ render_disciplines("Обов'язкові компоненти циклу загальної підготовки", zo_disciplines) }}
         {{ render_disciplines("Обов'язкові компоненти циклу професійної підготовки", po_disciplines) }}
         {{ render_disciplines("Вибіркові компоненти циклу професійної підготовки", pv_disciplines) }}
+        {{ render_disciplines("Нормативні освітні компоненти", nk_disciplines) }}
+        {{ render_disciplines("Вибіркові освітні компоненти", vk_disciplines) }}
 
 
     <!-- </body>

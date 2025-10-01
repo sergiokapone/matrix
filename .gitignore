@@ -1,4 +1,5 @@
 __pycache__/
+.ruff_cache/
 .env
 disciplines/
 wp_links.py
