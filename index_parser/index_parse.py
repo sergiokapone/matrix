@@ -13,7 +13,7 @@ def parse_index_links(index_file_path="disciplines/index.html", data_yaml=None):
         return
     
     data_yaml_stem = Path(data_yaml).stem
-    wp_links_yaml = f"wp_links_{data_yaml_stem}.yaml"
+    wp_links_yaml = Path("wp_links") / f"wp_links_{data_yaml_stem}.yaml"
 
     # Загружаем WP ссылки из YAML
     with open(wp_links_yaml, encoding="utf-8") as f:

@@ -356,12 +356,21 @@ def print_upload_summary(wp_links):
     print("-" * 60)
 
 
+from pathlib import Path
+
 def save_wp_links_yaml(wp_data, output_file="wp_links.yaml"):
     """Сохраняет WP ссылки + метаданные в YAML"""
     output_path = Path(output_file)
+    
+    # Проверяем и создаём родительскую папку, если её нет
+    if output_path.parent and not output_path.parent.exists():
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+    
     with open(output_path, "w", encoding="utf-8") as f:
         yaml.dump(wp_data, f, allow_unicode=True)
-    print(f"📋 WP ссылки сохранены в {output_file}")
+    
+    print(f"📋 WP ссылки сохранены в {output_path}")
+
 
 
 def handle_upload(yaml_file, disciplines_dir, check_dir=True):
@@ -384,17 +393,7 @@ def handle_upload(yaml_file, disciplines_dir, check_dir=True):
     wp_data = upload_html_files(disciplines_path, yaml_data, parent_id)
 
     yaml_name = Path(yaml_file).stem
-
-    save_wp_links_yaml(wp_data, f"wp_links_{yaml_name}.yaml")
-
-
-# def handle_upload_only(yaml_file, args): 
-#     """Только загрузка в WP (без генерации)""" 
-#     output_dir = args.output if args.output else "disciplines" 
-#     disciplines_dir = Path(output_dir) 
-#     if not disciplines_dir.exists(): 
-#         print(f"❌ Папка {output_dir} не існує! Спочатку згенеруйте сторінки за допомогою --all") 
-#         return
+    save_wp_links_yaml(wp_data, Path("wp_links") / f"wp_links_{yaml_name}.yaml")
 
 def get_index_slug(yaml_file):
     """Формирует slug для index страницы на основе year и degree"""
