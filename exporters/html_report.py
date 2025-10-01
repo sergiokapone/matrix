@@ -32,7 +32,7 @@ def generate_html_report(yaml_file="curriculum.yaml"):
     # Папка, де лежить main.py
     base_dir = Path.cwd()
 
-    gh_pages_dir = base_dir / "gh-pages"
+    gh_pages_dir = base_dir / "docs"
 
 
     temp_file = gh_pages_dir / Path(yaml_file).with_suffix(".html").name
