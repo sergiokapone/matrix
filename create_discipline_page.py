@@ -1,16 +1,15 @@
-import shutil
 import os
 import sys
+import shutil
+import yaml
+
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from slugify import slugify
 from dotenv import load_dotenv
-from slugify import slugify
-import yaml
 
 from core.yaml_handler import load_yaml_data
 from core.wp_uploader import update_wordpress_page
-from core.path_validator import validate_paths
 
 from index_parser.index_parse import parse_index_links
 
@@ -79,7 +78,7 @@ def load_discipline_data(yaml_file, discipline_code):
         lecturer_id = discipline["lecturer_id"]
         discipline["lecturer"] = lecturers.get(lecturer_id)
 
-    return data, discipline, lecturers
+    return data, discipline
 
 
 def prepare_discipline_context(discipline_code, discipline, data):
@@ -135,7 +134,7 @@ def generate_discipline_page(
 ):
     """Генерує HTML сторінку для конкретної дисципліни через Jinja2 шаблон"""
 
-    data, discipline, lecturers = load_discipline_data(yaml_file, discipline_code)
+    data, discipline = load_discipline_data(yaml_file, discipline_code)
     if data is None:
         return False
 
@@ -355,8 +354,6 @@ def print_upload_summary(wp_links):
         print(f'    "{code}": "{link}",')
     print("-" * 60)
 
-
-from pathlib import Path
 
 def save_wp_links_yaml(wp_data, output_file="wp_links.yaml"):
     """Сохраняет WP ссылки + метаданные в YAML"""

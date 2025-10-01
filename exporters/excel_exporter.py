@@ -12,7 +12,6 @@ def generate_matrices_from_yaml(
     # Завантажуємо YAML
     config = load_yaml_data(yaml_file)
 
-    metadata = config.get("metadata", {})
     disciplines = config["disciplines"]
     competencies = config["competencies"]
     program_results = config["program_results"]
