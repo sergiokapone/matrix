@@ -40,6 +40,7 @@ pip install -r requirements.txt
 
 ## Структура проекту
 
+```text
 .
 ├── data/
 │   ├── disciplines.yaml       # Основні дані дисциплін
@@ -51,6 +52,7 @@ pip install -r requirements.txt
 ├── index_parser/              # Модуль для парсингу index.html
 ├── create_discipline_page.py  # Головний скрипт CLI
 └── README.md
+```
 
 ---
 
