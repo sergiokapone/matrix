@@ -80,7 +80,7 @@ def get_mapped_competencies(discipline_code: str, mappings: dict, all_competenci
     return general_competencies, professional_competencies
 
 
-def get_mapped_program_results(discipline_code: str, mappings: dict, all_program_results) -> list[tuple]:
+def get_mapped_program_results(discipline_code: str, mappings: dict, all_program_results: dict) ->  list[tuple[str, str]]:
     """
     Отримує програмні результати навчання для дисципліни.
     
