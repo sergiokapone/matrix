@@ -1,3 +1,24 @@
+"""
+Генератор HTML-сторінок дисциплін для WordPress.
+
+Цей модуль забезпечує повний цикл роботи з навчальними дисциплінами:
+- Генерація HTML-сторінок на основі YAML-даних та Jinja2-шаблонів
+- Створення індексних сторінок зі списком всіх дисциплін
+- Завантаження згенерованих сторінок на WordPress через REST API
+- Парсинг та оновлення посилань у індексних файлах
+
+Основні компоненти:
+    - Завантаження даних з YAML (дисципліни, компетенції, програмні результати)
+    - Рендеринг HTML через Jinja2
+    - Інтеграція з WordPress REST API
+    - CLI інтерфейс для автоматизації
+
+Приклад використання:
+    $ python create_discipline_page.py data.yaml --all
+    $ python create_discipline_page.py data.yaml --discipline "ПО 01"
+    $ python create_discipline_page.py data.yaml --all --upload
+"""
+
 import os
 import sys
 import shutil
@@ -18,7 +39,29 @@ YAML_LECTURERS = Path("data") / "lecturers.yaml"
 
 
 def get_mapped_competencies(discipline_code, mappings, all_competencies):
-    """Отримує компетенції для конкретної дисципліни розділені на загальні та фахові"""
+    """
+    Отримує компетенції для конкретної дисципліни.
+    
+    Розділяє компетенції на два типи: загальні (ЗК) та фахові (ФК),
+    використовуючи мапінг між дисципліною та компетенціями.
+    
+    Args:
+        discipline_code (str): Код дисципліни (наприклад, "ПО 01").
+        mappings (dict): Словник маппінгів дисципліна → компетенції.
+        all_competencies (dict): Повний словник всіх компетенцій.
+    
+    Returns:
+        tuple[list, list]: Два списки кортежів (код, опис):
+            - general_competencies: Загальні компетенції (ЗК)
+            - professional_competencies: Фахові компетенції (ФК)
+    
+    Example:
+        >>> comps = {"ЗК1": "Здатність...", "ФК2": "Вміння..."}
+        >>> maps = {"ПО 01": {"competencies": ["ЗК1", "ФК2"]}}
+        >>> general, professional = get_mapped_competencies("ПО 01", maps, comps)
+        >>> general
+        [("ЗК1", "Здатність...")]
+    """
     if discipline_code not in mappings:
         return [], []
 
@@ -39,7 +82,23 @@ def get_mapped_competencies(discipline_code, mappings, all_competencies):
 
 
 def get_mapped_program_results(discipline_code, mappings, all_program_results):
-    """Отримує програмні результати для конкретної дисципліни"""
+    """
+    Отримує програмні результати навчання для дисципліни.
+    
+    Args:
+        discipline_code (str): Код дисципліни.
+        mappings (dict): Словник маппінгів дисципліна → програмні результати.
+        all_program_results (dict): Повний словник всіх програмних результатів.
+    
+    Returns:
+        list: Список кортежів (код_результату, опис_результату).
+    
+    Example:
+        >>> results = {"ПРН1": "Демонструвати..."}
+        >>> maps = {"ПО 01": {"program_results": ["ПРН1"]}}
+        >>> get_mapped_program_results("ПО 01", maps, results)
+        [("ПРН1", "Демонструвати...")]
+    """
     if discipline_code not in mappings:
         return []
 
@@ -54,7 +113,24 @@ def get_mapped_program_results(discipline_code, mappings, all_program_results):
 
 
 def load_discipline_data(yaml_file, discipline_code):
-    """Завантажує дані дисципліни та лекторів"""
+    """
+    Завантажує дані дисципліни та інформацію про викладачів.
+    
+    Об'єднує обов'язкові та вибіркові дисципліни, шукає задану дисципліну
+    та розгортає інформацію про викладача за його ID.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        discipline_code (str): Код дисципліни для пошуку.
+    
+    Returns:
+        tuple: (data, discipline) або (None, None) якщо дисципліну не знайдено.
+            - data (dict): Повні дані з YAML-файлу.
+            - discipline (dict): Дані конкретної дисципліни з розгорнутим викладачем.
+    
+    Note:
+        Автоматично завантажує дані викладачів з YAML_LECTURERS.
+    """
     data = load_yaml_data(yaml_file)
     lecturers = load_yaml_data(YAML_LECTURERS)
 
@@ -64,13 +140,10 @@ def load_discipline_data(yaml_file, discipline_code):
     if "elevative_disciplines" in data:
         all_disciplines.update(data["elevative_disciplines"])
 
-    # all_disciplines = {**data["disciplines"], **data["elevative_disciplines"]}
-
     if discipline_code not in all_disciplines:
         print(f"❌ Дисципліна {discipline_code} не знайдена!")
-        return None, None, None
+        return None, None
 
-    # Шукаємо дисципліну в обох словниках
     discipline = all_disciplines[discipline_code]
 
     # Розгортаємо lecturer_id в повні дані лектора
@@ -82,7 +155,26 @@ def load_discipline_data(yaml_file, discipline_code):
 
 
 def prepare_discipline_context(discipline_code, discipline, data):
-    """Підготовка контексту для шаблону дисципліни"""
+    """
+    Підготовляє контекст для рендерингу Jinja2-шаблону дисципліни.
+    
+    Збирає всі необхідні дані: метадані, компетенції (загальні та фахові),
+    програмні результати навчання.
+    
+    Args:
+        discipline_code (str): Код дисципліни.
+        discipline (dict): Дані дисципліни.
+        data (dict): Повні дані з YAML-файлу.
+    
+    Returns:
+        dict: Контекст для шаблону з ключами:
+            - discipline_code: Код дисципліни
+            - discipline: Повні дані дисципліни
+            - metadata: Метадані (рік, ступінь)
+            - general_competencies: Загальні компетенції
+            - professional_competencies: Фахові компетенції
+            - mapped_program_results: Програмні результати
+    """
     metadata = data.get("metadata", {})
 
     general_comps, professional_comps = get_mapped_competencies(
@@ -103,26 +195,67 @@ def prepare_discipline_context(discipline_code, discipline, data):
 
 
 def get_jinja_environment():
-    """Створює Jinja2 Environment з шаблонами"""
+    """
+    Створює налаштоване Jinja2 Environment для рендерингу шаблонів.
+    
+    Returns:
+        Environment: Jinja2 Environment з FileSystemLoader та автоескейпінгом.
+    
+    Note:
+        Шаблони завантажуються з папки 'templates' відносно поточного файлу.
+    """
     templates_dir = os.path.join(os.path.dirname(__file__), "templates")
     return Environment(loader=FileSystemLoader(templates_dir), autoescape=True)
 
 
 def render_template(template_file, context):
-    """Рендерить HTML через Jinja2 шаблон"""
+    """
+    Рендерить HTML-контент через Jinja2-шаблон.
+    
+    Args:
+        template_file (str): Ім'я файлу шаблону в папці templates/.
+        context (dict): Контекст з даними для шаблону.
+    
+    Returns:
+        str: Згенерований HTML-контент.
+    
+    Example:
+        >>> context = {"title": "Дисципліна", "code": "ПО 01"}
+        >>> html = render_template("discipline_template.html", context)
+    """
     env = get_jinja_environment()
     template = env.get_template(template_file)
-    return template.render(context)
+    return template.render(context))
 
 
 def save_html_file(content, output_file):
-    """Зберігає HTML контент у файл"""
+    """
+    Зберігає HTML-контент у файл з кодуванням UTF-8.
+    
+    Args:
+        content (str): HTML-контент для збереження.
+        output_file (str | Path): Шлях до файлу для збереження.
+    """
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(content)
 
 
 def get_safe_filename(discipline_code):
-    """Створює безпечне ім'я файлу з коду дисципліни"""
+    """
+    Створює безпечне ім'я файлу з коду дисципліни.
+    
+    Замінює пробіли та слеші на підкреслення для сумісності з файловою системою.
+    
+    Args:
+        discipline_code (str): Код дисципліни (може містити пробіли та слеші).
+    
+    Returns:
+        str: Безпечне ім'я файлу.
+    
+    Example:
+        >>> get_safe_filename("ПО 01/02")
+        "ПО_01_02"
+    """
     return discipline_code.replace(" ", "_").replace("/", "_")
 
 
@@ -132,8 +265,31 @@ def generate_discipline_page(
     output_file=None,
     template_file="discipline_template.html",
 ):
-    """Генерує HTML сторінку для конкретної дисципліни через Jinja2 шаблон"""
-
+    """
+    Генерує HTML-сторінку для конкретної дисципліни.
+    
+    Завантажує дані, рендерить шаблон та зберігає результат у файл.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        discipline_code (str): Код дисципліни для генерації.
+        output_file (str | Path, optional): Шлях до вихідного файлу.
+            Якщо None, генерується автоматично.
+        template_file (str, optional): Ім'я Jinja2-шаблону.
+            За замовчуванням "discipline_template.html".
+    
+    Returns:
+        bool: True якщо генерація успішна, False якщо дисципліну не знайдено.
+    
+    Example:
+        >>> generate_discipline_page(
+        ...     Path("data.yaml"),
+        ...     "ПО 01",
+        ...     output_file="output/po_01.html"
+        ... )
+        ✅ Сторінка дисципліни створена: output/po_01.html
+        True
+    """
     data, discipline = load_discipline_data(yaml_file, discipline_code)
     if data is None:
         return False
@@ -151,17 +307,46 @@ def generate_discipline_page(
 
 
 def create_output_directory(output_dir):
-    """Створює директорію для виводу"""
+    """
+    Створює директорію для виводу файлів, якщо вона не існує.
+    
+    Args:
+        output_dir (str | Path): Шлях до директорії.
+    
+    Returns:
+        Path: Path-об'єкт створеної/існуючої директорії.
+    """
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
     return output_path
 
-
 def generate_all_disciplines(
     yaml_file, output_dir="disciplines", template_file="discipline_template.html"
 ):
-    """Генерує сторінки для всіх дисциплін"""
-
+    """
+    Генерує HTML-сторінки для всіх дисциплін з YAML-файлу.
+    
+    Об'єднує обов'язкові та вибіркові дисципліни і генерує для кожної окрему сторінку.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        output_dir (str, optional): Папка для збереження файлів.
+            За замовчуванням "disciplines".
+        template_file (str, optional): Ім'я Jinja2-шаблону.
+            За замовчуванням "discipline_template.html".
+    
+    Note:
+        Виводить прогрес у консоль та підсумкову статистику успішно створених сторінок.
+    
+    Example:
+        >>> generate_all_disciplines(
+        ...     Path("data.yaml"),
+        ...     output_dir="output",
+        ...     template_file="custom_template.html"
+        ... )
+        🚀 Генерація сторінок для 15 дисциплін...
+        ✅ Успішно створено 15 сторінок у папці output
+    """
     data = load_yaml_data(yaml_file)
     output_path = create_output_directory(output_dir)
     disciplines = data.get("disciplines", {}) | data.get("elevative_disciplines", {})
@@ -181,7 +366,30 @@ def generate_all_disciplines(
 
 
 def calculate_subdiscipline_totals(discipline):
-    """Розраховує загальні кредити та форми контролю для піддисциплін"""
+    """
+    Розраховує загальні кредити та форми контролю для піддисциплін.
+    
+    Якщо дисципліна містить піддисципліни, підсумовує їхні кредити
+    та об'єднує унікальні форми контролю.
+    
+    Args:
+        discipline (dict): Дані дисципліни, можуть містити ключ "subdisciplines".
+    
+    Returns:
+        tuple[int, str]: Кортеж (загальні_кредити, об'єднані_форми_контролю).
+            - total_credits (int): Сума кредитів всіх піддисциплін
+            - all_controls (str): Форми контролю через кому (наприклад, "Іспит, Залік")
+    
+    Example:
+        >>> discipline = {
+        ...     "subdisciplines": {
+        ...         "sub1": {"credits": 3, "control": "Іспит"},
+        ...         "sub2": {"credits": 2, "control": "Залік"}
+        ...     }
+        ... }
+        >>> calculate_subdiscipline_totals(discipline)
+        (5, "Іспит, Залік")
+    """
     if "subdisciplines" not in discipline or not discipline["subdisciplines"]:
         return discipline.get("credits", 0), discipline.get("control", "")
 
@@ -201,7 +409,22 @@ def calculate_subdiscipline_totals(discipline):
 
 
 def prepare_disciplines_with_totals(disciplines):
-    """Підготовка дисциплін з розрахованими підсумками"""
+    """
+    Додає розраховані підсумки до кожної дисципліни.
+    
+    Для кожної дисципліни розраховує і додає:
+    - total_credits: загальна кількість кредитів
+    - all_controls: об'єднані форми контролю
+    
+    Args:
+        disciplines (dict): Словник дисциплін {код: дані_дисципліни}.
+    
+    Returns:
+        dict: Той самий словник дисциплін з доданими полями total_credits та all_controls.
+    
+    Note:
+        Модифікує словник in-place, але також повертає його для зручності.
+    """
     for _, discipline in disciplines.items():
         total_credits, all_controls = calculate_subdiscipline_totals(discipline)
         discipline["total_credits"] = total_credits
@@ -211,8 +434,25 @@ def prepare_disciplines_with_totals(disciplines):
 
 
 def generate_index_page(yaml_file, output_file="index.html"):
-    """Генерує індексну сторінку зі списком всіх дисциплін через Jinja2 шаблон"""
-
+    """
+    Генерує індексну сторінку зі списком всіх дисциплін.
+    
+    Створює HTML-файл з таблицею всіх дисциплін (обов'язкових та вибіркових),
+    їхніми кредитами та формами контролю.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        output_file (str | Path, optional): Шлях до вихідного файлу.
+            За замовчуванням "index.html".
+    
+    Note:
+        Використовує шаблон "index_template.html" з папки templates/.
+        Виводить повідомлення про успішне створення у консоль.
+    
+    Example:
+        >>> generate_index_page(Path("data.yaml"), "disciplines/index.html")
+        📋 Індексна сторінка створена: disciplines/index.html
+    """
     data = load_yaml_data(yaml_file)
     metadata = data.get("metadata", {})
     disciplines = data.get("disciplines", {}) | data.get("elevative_disciplines", {})
@@ -231,7 +471,18 @@ def generate_index_page(yaml_file, output_file="index.html"):
 
 
 def validate_yaml_file(yaml_file):
-    """Перевіряє існування YAML файлу"""
+    """
+    Перевіряє існування YAML-файлу.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу.
+    
+    Returns:
+        bool: True якщо файл існує, False якщо ні.
+    
+    Note:
+        Виводить повідомлення про помилку у консоль при відсутності файлу.
+    """
     if not Path(yaml_file).exists():
         print(f"❌ YAML файл не знайдено: {yaml_file}")
         return False
@@ -239,31 +490,66 @@ def validate_yaml_file(yaml_file):
 
 
 def clean_output_directory(output_dir='disciplines'):
-    """Видаляє директорію з усім вмістом"""
+    """
+    Видаляє директорію з усім вмістом.
+    
+    Args:
+        output_dir (str, optional): Шлях до директорії для видалення.
+            За замовчуванням 'disciplines'.
+    
+    Warning:
+        Видаляє директорію рекурсивно без підтвердження!
+    """
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
 
 def handle_single_discipline(yaml_file, discipline_code, template):
-    """Обробка генерації однієї дисципліни"""
+    """
+    Обробляє генерацію однієї дисципліни через CLI.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        discipline_code (str): Код дисципліни для генерації.
+        template (str): Ім'я Jinja2-шаблону.
+    
+    Note:
+        Створює папку "disciplines" якщо вона не існує.
+    """
     output_dir = create_output_directory("disciplines")
     safe_name = get_safe_filename(discipline_code)
     output_file = output_dir / f"{safe_name}.html"
     generate_discipline_page(yaml_file, discipline_code, output_file, template)
 
 
-def handle_all_disciplines(yaml_file, clean=False):
-    """Обробка генерації всіх дисциплін"""
-
+def handle_all_disciplines(yaml_file, args):
+    """
+    Обробляє генерацію всіх дисциплін через CLI.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        args (Namespace): Об'єкт argparse з параметрами командного рядка.
+            Використовується args.clean для очищення папки перед генерацією.
+    
+    Note:
+        Якщо args.clean=True, спочатку видаляє існуючу папку з виводом.
+    """
     output_dir = create_output_directory("disciplines")
-    if clean:
+    if args.clean:
         clean_output_directory(output_dir)
 
     generate_all_disciplines(yaml_file, output_dir)
 
 
 def handle_index_generation(yaml_file, output):
-    """Обробка генерації індексної сторінки"""
+    """
+    Обробляє генерацію індексної сторінки через CLI.
+    
+    Args:
+        yaml_file (Path): Шлях до YAML-файлу з даними.
+        output (str | None): Шлях до вихідного файлу або None.
+            Якщо None, використовується "disciplines/index.html".
+    """
     output_dir = create_output_directory("disciplines")
     output_file = Path(output) if output else output_dir / "index.html"
     generate_index_page(yaml_file, output_file)
@@ -272,7 +558,23 @@ def handle_index_generation(yaml_file, output):
 # === WordPress Upload Functions ===
 
 def get_parent_id(yaml_data):
-    """Отримання PARENT_ID з YAML"""
+    """
+    Отримує ID батьківської сторінки WordPress з YAML-даних.
+    
+    Args:
+        yaml_data (dict): Дані з YAML-файлу.
+    
+    Returns:
+        int: ID батьківської сторінки WordPress.
+    
+    Raises:
+        SystemExit: Якщо ключ 'page_id' відсутній у metadata.
+    
+    Example:
+        >>> yaml_data = {"metadata": {"page_id": 123}}
+        >>> get_parent_id(yaml_data)
+        123
+    """
     try:
         return yaml_data['metadata']['page_id']
     except KeyError:
@@ -281,7 +583,18 @@ def get_parent_id(yaml_data):
 
 
 def read_html_file(file_path):
-    """Читання HTML файлу"""
+    """
+    Читає HTML-файл та повертає його вміст.
+    
+    Args:
+        file_path (Path): Шлях до HTML-файлу.
+    
+    Returns:
+        str | None: Вміст файлу або None при помилці читання.
+    
+    Note:
+        При помилці виводить повідомлення у консоль.
+    """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
@@ -291,7 +604,33 @@ def read_html_file(file_path):
 
 
 def upload_html_files(disciplines_dir, yaml_data, parent_id):
-    """Завантаження всіх HTML файлів на WordPress та підготовка YAML-структури"""
+    """
+    Завантажує всі HTML-файли дисциплін на WordPress.
+    
+    Сканує директорію з HTML-файлами, завантажує кожен на WordPress
+    та збирає посилання на створені/оновлені сторінки.
+    
+    Args:
+        disciplines_dir (Path): Папка з HTML-файлами дисциплін.
+        yaml_data (dict): Дані з YAML-файлу (для отримання назв дисциплін).
+        parent_id (int): ID батьківської сторінки WordPress.
+    
+    Returns:
+        dict: Структура для збереження в YAML:
+            {
+                "year": "2024",
+                "degree": "Бакалавр",
+                "links": {
+                    "ПО 01": "https://site.com/page1",
+                    "ПО 02": "https://site.com/page2"
+                }
+            }
+    
+    Note:
+        - Пропускає файл index.html
+        - Використовує slugify для створення URL-friendly slug
+        - Виводить статус завантаження кожного файлу у консоль
+    """
     wp_links = {}
     
     # Об'єднуємо обидва словники дисциплін
@@ -346,8 +685,17 @@ def upload_html_files(disciplines_dir, yaml_data, parent_id):
 
     return wp_data
 
+
 def print_upload_summary(wp_links):
-    """Виведення підсумкової інформації про завантаження"""
+    """
+    Виводить підсумкову інформацію про завантаження у зручному форматі.
+    
+    Args:
+        wp_links (dict): Словник {код_дисципліни: посилання_wordpress}.
+    
+    Note:
+        Виводить відсортований список у форматі YAML/Python dict.
+    """
     print("-" * 60)
     print("📋 Підсумок - всі посилання:")
     for code, link in sorted(wp_links.items()):
@@ -356,7 +704,23 @@ def print_upload_summary(wp_links):
 
 
 def save_wp_links_yaml(wp_data, output_file="wp_links.yaml"):
-    """Сохраняет WP ссылки + метаданные в YAML"""
+    """
+    Зберігає посилання WordPress та метадані у YAML-файл.
+    
+    Args:
+        wp_data (dict): Структура з посиланнями та метаданими:
+            {
+                "year": "2024",
+                "degree": "Бакалавр",
+                "links": {"ПО 01": "https://..."}
+            }
+        output_file (str | Path, optional): Шлях до вихідного YAML-файлу.
+            За замовчуванням "wp_links.yaml".
+    
+    Note:
+        Автоматично створює батьківські директорії якщо їх не існує.
+        Використовує кодування UTF-8 для підтримки кирилиці.
+    """
     output_path = Path(output_file)
     
     # Проверяем и создаём родительскую папку, если её нет
