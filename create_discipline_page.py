@@ -370,7 +370,7 @@ def save_wp_links_yaml(wp_data, output_file="wp_links.yaml"):
 
 
 
-def handle_upload(yaml_file, disciplines_dir, check_dir=True):
+def handle_upload(yaml_file, disciplines_dir, check_dir=True, save_yaml=True):
     """Обробка завантаження на WordPress"""
     load_dotenv()
 
@@ -389,8 +389,10 @@ def handle_upload(yaml_file, disciplines_dir, check_dir=True):
 
     wp_data = upload_html_files(disciplines_path, yaml_data, parent_id)
 
-    yaml_name = Path(yaml_file).stem
-    save_wp_links_yaml(wp_data, Path("wp_links") / f"wp_links_{yaml_name}.yaml")
+    # Зберігаємо YAML тільки якщо save_yaml=True
+    if save_yaml:
+        yaml_name = Path(yaml_file).stem
+        save_wp_links_yaml(wp_data, Path("wp_links") / f"wp_links_{yaml_name}.yaml")
 
 def get_index_slug(yaml_file):
     """Формирует slug для index страницы на основе year и degree"""
@@ -545,7 +547,12 @@ def main():
         'clean': lambda: clean_output_directory(),
         'discipline': lambda: handle_single_discipline(yaml_file, args.discipline, args.template),
         'all': lambda: handle_all_disciplines(yaml_file, args),
-        'upload': lambda: handle_upload(yaml_file, args.output or "disciplines", check_dir=True),
+        'upload': lambda: handle_upload(
+            yaml_file, 
+            args.output or "disciplines", 
+            check_dir=True,
+            save_yaml=not args.discipline  # False якщо -d вказано
+        ),
         'index': lambda: handle_index_generation(yaml_file, args.output),
         'parse_index': lambda: handle_parse_index(yaml_file, args.output),
         'upload_index': lambda: handle_upload_index(yaml_file, args.output),
